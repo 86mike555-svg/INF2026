@@ -1,0 +1,42 @@
+#include <stdio.h>
+
+int main()
+{
+    int main_count1 = 85'000;
+    int dengy = 0;
+
+    int year = 2025;
+    int mount = 1;
+
+    int nalogovaia = 2'000'000;
+    int nalogovaia_flag = 0;
+
+    // this kosaia cherta is comment
+    while ( !((year == 2030 && mount == 2)) || nalogovaia_flag == 1 ){
+        // this || is "or" operation, && is "and"
+        if (mount == 5){
+            main_count1 = (main_count1 * 3);
+        }
+
+        dengy += main_count1;
+
+        if (dengy == nalogovaia){
+            nalogovaia_flag += 1;
+            printf("nalogovaia is come...");
+            nalogovaia_flag = 0;
+            //break;
+            // это был эксперемент с флагами для экстренного прерывания while
+        }
+        
+        ++mount;
+        if (mount == 13){
+            ++year;
+            // это опервция добавляет к инту саму себя
+            mount = 1;
+        }
+    }
+
+    printf("main_count1 =  %d\n", main_count1);
+    printf("dengy = %d\n", dengy);
+    //printf("nalogovaia is not come");
+}
