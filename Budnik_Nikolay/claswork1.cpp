@@ -3,18 +3,38 @@
 // typedef int RUB // C
 using RUB = long long int; // C++
 
-RUB salary = 180001;
-RUB capital = 0;
+struct Car {
+    RUB value;
+    RUB gas;
+}
+struct Person {
+RUB salary;
+RUB capital;
+RUB food;
+RUN car;
+};
+struct Persen Alice;
+
 
 void print(){
     printf("Salary = %lld\n", salary);
     printf("Capital = %lld", capital);
 }
-void my_salary(const int month, const int year) {
+void alice_init(){
+    Alice.salary = 10000;
+    Alice.capital = 50000;
+    Alice.food = 2000;
+}
+
+void alice_salary(const int month, const int year) {
   if ((month == 8) && (year == 2026)) { // Promotion
-    salary = salary * 1.5;
+      Alice.salary *= 1.5;
   }
-  capital += salary;
+Alice.capital += Alice.salary;
+}
+
+void alice_food(){
+    Alice.capital -= Alice.food;
 }
 
 void simulation(){
@@ -27,7 +47,8 @@ void simulation(){
     while (!((month == 3) && (year == 2027))) {
       capital += capital * (pp / 12.0 / 100.0); // Bank interest
 
-      my_salary(month, year);
+      alice_food();
+      alice_salary(month, year);
 
       ++month;
       if (month == 13) {
@@ -37,8 +58,11 @@ void simulation(){
     }
 }
 
+
 int main()
 {
+    alice_init();
+
     simulation();
     print();
 }
