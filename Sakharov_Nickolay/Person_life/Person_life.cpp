@@ -93,7 +93,7 @@ void simulation()
         }
     }
 }
-void alice_init()   
+void alice_init()
 {
     Alice.bank.balance = 0;
     Alice.bank.deposit = 0;
@@ -112,4 +112,3 @@ int main()
 
     print_results();
 }
-//k
