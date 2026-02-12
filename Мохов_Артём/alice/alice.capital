@@ -1,0 +1,200 @@
+#include <stdio.h>
+
+using RUB = long long int;
+struct Apartment {
+	RUB value1;
+	RUB communal;
+};
+struct Bank {
+	RUB depozit;
+	float percent;
+	RUB wallet;
+	float indexation;
+	float inflation;
+};
+struct Car {
+	RUB value;
+	RUB gas;
+	RUB maintenance;
+};
+struct Person {
+	RUB salary;
+	RUB cat;
+	RUB capital;
+	RUB food;
+	Car car;
+	Bank bank;
+	Apartment apartment;
+
+};
+struct Person alice;
+
+void alice_init() {
+alice.capital = 0;
+alice.salary = 130'000;
+alice.food = 32'000;
+alice.car.value = 2'400'000;
+alice.car.gas = 12'000;
+alice.bank.wallet = 0;
+alice.bank.indexation = 10;
+alice.bank.inflation = 1.8;
+alice.bank.depozit = 150000;
+alice.apartment.communal = 18000;
+alice.apartment.value1 = 12000000;
+alice.car.maintenance = 10000;
+alice.cat = 6000;
+
+}
+
+float alice_tax_c(RUB yep) {
+	if ( yep >20000000) {
+		return 0.40;
+	};
+	if (yep < 20000000 and yep>10000000)
+	{
+		return 0.30;
+	};
+	return 0.15;
+}
+void taxminus()
+{
+	float tt = alice_tax_c(alice.capital);
+	alice.salary -= alice.salary * tt;
+}
+void taxplus()
+{
+	float tt = alice_tax_c(alice.capital);
+	alice.salary = alice.salary / (1- tt);
+}
+void alice_capital()
+{
+	alice.capital = alice.car.value + alice.bank.depozit + alice.apartment.value1;
+}
+
+void alice_depozit() {
+	alice.bank.depozit += alice.bank.wallet;
+	alice.bank.wallet = 0;
+}
+
+void alice_apartment(int month)
+{
+	alice.bank.wallet -= alice.apartment.communal;
+		if (month == 12) {
+			alice.apartment.communal += alice.apartment.communal * alice.bank.inflation * 12/ 100;
+		}
+		alice.apartment.value1 += alice.apartment.value1 * alice.bank.inflation/4 / 100;
+}
+
+void alice_cat()
+{
+	alice.bank.wallet -= alice.cat;
+	alice.cat += alice.cat * alice.bank.inflation / 100;
+}
+
+float depreciation()
+{
+	if (alice.car.value > 8000000)
+	{
+		return 2;
+	}
+
+	if (alice.car.value > 1000000 and alice.car.value < 8000000)
+	{
+		return 1;
+	}
+	if (alice.car.value < 1000000)
+	{
+		return 0.5;
+	}
+	return 0.2;
+
+}
+
+float sberbank_interest(RUB sum)
+{
+	
+		if (sum > 10'000 and sum < 3'000'000) {
+			return 11.5;
+		}
+
+		if (sum >= 3'000'000) {
+			return 12.5;  //  125 -1 +
+		}
+
+		return 0.1;
+	}
+
+void alice_salary(const int year, const int month)
+{
+	if (month == 12)
+	{
+		alice.salary += alice.salary * alice.bank.indexation / 100;
+	}
+	if (month == 3 and year == 2026) {
+		alice.salary *= 1.3;
+	}
+	alice.bank.wallet += alice.salary;
+
+}
+
+void alice_food()
+{
+			alice.bank.wallet -= alice.food;
+			alice.food += alice.food * alice.bank.inflation/100;
+}
+
+void print_results()
+{
+			printf("Salary = %lld\n", alice.salary);
+			printf("Capital = %lld\n", alice.capital);
+			printf("Depozit = %lld\n", alice.bank.depozit);
+			printf("CAR = %lld\n", alice.car.value);
+}
+
+void alice_car()
+{
+	alice.bank.wallet -= alice.car.gas;
+	alice.car.value -= alice.car.value * depreciation() / 100;
+	alice.bank.wallet -= alice.car.maintenance;
+	alice.car.gas += alice.car.gas * alice.bank.inflation / 100;
+	alice.car.maintenance+= alice.car.maintenance * alice.bank.inflation / 100;
+}
+void alice_bank_interest()
+{
+		float pp;
+		pp = sberbank_interest(alice.bank.depozit);
+		alice.bank.depozit += alice.bank.depozit * (pp / 12.0 / 100.0);
+	}
+
+	void alice_simulation()
+	{
+		int year = 2026;
+		int month = 2;
+
+		while (not (year == 2027 and month == 2)) {
+			taxminus();
+			alice_salary(year, month);
+			alice_food();
+			alice_car();
+			alice_apartment(month);
+			alice_cat();
+			alice_depozit();
+			alice_bank_interest();
+			alice_capital();
+			taxplus();
+			++month;
+			if (month == 13) {
+				++year;
+				month = 1;
+			}
+		}
+	}
+
+
+	int main()
+{
+		alice_init();
+
+		alice_simulation();
+	print_results();
+}
