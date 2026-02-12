@@ -1,7 +1,16 @@
 #include <stdio.h>
 #include <iostream>
-// typedef int RUB; // Ключевое слово, зарезервировано под функции языка, используют в С
-using RUB = long long int; // Используют в С++, можно из одного места поменять типы данных многих переменных
+#include <string>
+using namespace std;
+
+using RUB = long long int;
+double inflation;
+struct Cat
+{
+    string color;
+    int age;
+    RUB cat_food;
+};
 
 struct Car
 {
@@ -21,16 +30,20 @@ struct Bank
 };
 
 struct Person
-{ // создали свой тип данных
+{
     Work work;
     RUB food;
     Car car;
     Bank bank;
     RUB deposit_sum;
+    Cat Pushok;
 };
 
-Person Alice; // создали переменную типа данных Person
-
+Person Alice;
+void alice_cat()
+{
+    Alice.bank.balance -= Alice.Pushok.cat_food;
+}
 void alice_car()
 {
     Alice.bank.balance -= Alice.car.gas;
@@ -39,7 +52,7 @@ void alice_car()
 void alice_salary(const int month, const int year)
 {
     if ((month == 8) && (year == 2026))
-    { // Promotion
+    {
         Alice.work.salary = Alice.work.salary * Alice.work.raising;
     }
     Alice.bank.balance += Alice.work.salary;
@@ -69,11 +82,9 @@ void simulation()
     int month = 2;
     int year = 2026;
     bool firstIteration = true;
-    //  for (int month = 1; month < 19; ++month) {
-    while (!((month == 3) && (year == 2127)))
+    while (!((month == 3) && (year == 2030)))
     {
-        // my_cat()
-        // my_trip()
+        alice_cat();
         alice_food();
         alice_car();
         alice_salary(month, year);
@@ -83,11 +94,15 @@ void simulation()
             alice_deposit_percent();
         }
         firstIteration = false;
-        //
         alice_bank_interest();
         ++month;
         if (month == 13)
         {
+            double min = 5.5, max = 6.4;
+            inflation = (double)rand() / RAND_MAX * (max - min) + min;
+            Alice.food *= inflation / 100;
+            Alice.car.gas *= inflation / 100;
+            Alice.Pushok.cat_food *= inflation / 100;
             month = 1;
             ++year;
         }
@@ -98,17 +113,18 @@ void alice_init()
     Alice.bank.balance = 0;
     Alice.bank.deposit = 0;
     Alice.work.salary = 180000;
-    Alice.food = 20000;
+    Alice.food = 30000;
     Alice.car.value = 2400000;
-    Alice.work.raising = 1.5;
+    Alice.work.raising = 1.2;
     Alice.deposit_sum = 40000;
     Alice.bank.percent = 14;
+    Alice.Pushok.cat_food = 6000;
+    Alice.Pushok.age = 3;
+    Alice.Pushok.color = "white";
 }
 int main()
 {
     alice_init();
-
     simulation();
-
     print_results();
 }
