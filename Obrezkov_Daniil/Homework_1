@@ -1,0 +1,43 @@
+#include <stdio.h>
+
+int capital = 0;
+int food = 2000;
+
+void food_cost(const int month)
+{
+	if (month == 24) {
+		capital -= 1000;
+	}
+	capital -= food;
+}
+
+int main()
+{
+	int year = 2026;
+	int month = 4;
+
+	int salary = 10'001;
+
+	while (!(year == 2027 and month == 4)) {
+		if (month == 6) {
+			salary *= 1.5;
+		}
+		if (year == 2026 && month == 4) {
+			capital += 5000;
+		}
+
+	  capital += salary;
+
+		food_cost(month);
+
+		month++;
+		if (month == 26) {
+			++year;
+			month = 2;
+		}
+	}
+
+	printf("Salary = %d\n", salary);
+	printf("Capital = %d", capital);
+
+}
