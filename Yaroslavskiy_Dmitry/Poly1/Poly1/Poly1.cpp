@@ -112,7 +112,6 @@ void judy_deposite(const int month, const int year)         //функция д�
 
     judy.zoobank.deposite += judy.zoobank.deposite * (judy.zoobank.interest / 12.0 / 100.0);    //сложный процент
 
-    printf("depos123 = %lld  ", judy.zoobank.deposite);
     judy.zoobank.deposite += judy.zoobank.account;
     judy.zoobank.account = 0;
 }
@@ -126,24 +125,27 @@ void judy_freelance(const int month, const int year)            //функция
 }
 
 
-void print_results()                            //функция вывода результатов
+void print_results(RUB deposit_at_start)                            //функция вывода результатов
 {
-    printf("Salary = %lld  ", judy.salary);
-    printf("depos = %lld  ", judy.zoobank.deposite);
-
     RUB capital = 0;
+    RUB profit = judy.zoobank.deposite - deposit_at_start;
     capital += judy.zoobank.account;
     capital += judy.car.value;
     capital += judy.zoobank.deposite;
     capital += judy.zoobank.account_usd * judy.zoobank.rate_usd_rub;
     printf("Capital = %lld\n", capital);
+    printf("Salary = %lld \n", judy.salary);
+    printf("Deposit = %lld  ", judy.zoobank.deposite);
+    printf("Interest on deposit = %.1f\n", judy.zoobank.interest);
+    printf("Profit YOY = %lld \n", profit); // Вывод прибыли за год
 }
 
 
 void simulation()                               //функция всей симуляции
 {
-    int month = 1;
+    int month = 2;
     int year = 2026;
+    RUB deposit_at_start_of_year = judy.zoobank.deposite;
 
     while (not (month == 3 and year == 2030)) {
         //judy_salary(month, year);
@@ -158,7 +160,10 @@ void simulation()                               //функция всей сим
 
         ++month;
         if (month == 13) {
-            print_results();
+            RUB profit = judy.zoobank.deposite - deposit_at_start_of_year;
+            printf("------------Year %d", year);
+            printf(" Results:------------------------\n");
+            print_results(deposit_at_start_of_year);
             ++year;
             month = 1;
         }
@@ -174,5 +179,5 @@ int main()
 
     simulation();
 
-    print_results();
+    //print_results(deposit_at_start_of_year);
 }
