@@ -1,0 +1,61 @@
+#include <stdio.h>
+
+using RUB = long long int;
+
+
+struct Person
+{
+	RUB capital;
+	RUB salary;
+	RUB food;
+
+
+	void salary_bill(int month)
+	{
+		if (month == 12)
+		{
+			capital += salary; // 13-я зарплата
+		}
+		capital += salary;
+	}
+
+	void food_bill()
+	{
+		capital -= food;
+	}
+
+	void output()
+	{
+
+	}
+};
+
+
+int main()
+{
+	int month = 3;
+	int year = 2030;
+	Person Alex{ 0, 150'000, 20'000 };
+	Person Mary{ 0, 80'000, 18'000 };
+
+	while (not (month == 3 and year == 2050))
+	{
+		Alex.salary_bill(month);
+		Alex.food_bill();
+
+		Mary.salary_bill(month);
+		Mary.food_bill();
+
+		month++;
+		if (month == 13)
+		{
+			year++;
+			month = 1;
+		}
+	}
+
+	printf("Alex capital on 2050 = %lld\n", Alex.capital);
+	printf("Alex salary on 2050 = %lld\n", Alex.salary);
+	printf("Mary capital on 2050 = %lld\n", Mary.capital);
+	printf("Mary salary on 2050 = %lld\n", Mary.salary);
+}
