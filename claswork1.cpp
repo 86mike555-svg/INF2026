@@ -1,7 +1,6 @@
 
 #include <stdio.h>
 
-
 using RUB = long long int;
 
 // --- DATA STRUCTURES ---
