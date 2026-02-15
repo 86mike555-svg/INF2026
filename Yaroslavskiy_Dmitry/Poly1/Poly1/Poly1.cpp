@@ -28,7 +28,7 @@ struct Bank {                   //структура банка
     float rate_usd_rub;
 
     Percent interest;
-    Rate rate;
+    //Rate rate;
    
 };
 
