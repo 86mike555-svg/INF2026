@@ -124,7 +124,7 @@ static void alice_cover_account_from_deposit()
     Alice.bank.account += take;
 }
 
-// --- INIT --- SIM ---
+// --- INIT --- SIM --- PRINT
 void alice_init()
 {
     Alice.capital = 0;
