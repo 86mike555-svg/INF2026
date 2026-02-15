@@ -5,19 +5,21 @@ using RUB = long long int; // C++
 struct Car {
     RUB value;
     RUB gas;
-}
+};
+
 struct Person {
 RUB salary;
 RUB capital;
 RUB food;
-RUN car;
+RUB car;
 };
-struct Persen Alice;
+
+struct Person Alice;
 
 
 void print(){
-    printf("Salary = %lld\n", salary);
-    printf("Capital = %lld", capital);
+    printf("Salary = %lld\n", Alice.salary);
+    printf("Capital = %lld", Alice.capital);
 }
 void alice_init(){
     Alice.salary = 10000;
@@ -44,7 +46,7 @@ void simulation(){
 
   //  for (int month = 1; month < 19; ++month) {
     while (!((month == 3) && (year == 2027))) {
-      capital += capital * (pp / 12.0 / 100.0); // Bank interest
+      Alice.capital += Alice.capital * (pp / 12.0 / 100.0); // Bank interest
 
       alice_food();
       alice_salary(month, year);
