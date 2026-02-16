@@ -97,6 +97,14 @@ void print_results()
     printf("Deposit = %lld", Alice.VTB.deposit);
 }
 
+void inflation_in_year(){
+    double min = 5.5, max = 6.4;
+    inflation = (double)rand() / RAND_MAX * (max - min) + min;
+    Alice.food *= inflation / 100;
+    Alice.car.gas *= inflation / 100;
+    Alice.Pushok.cat_food *= inflation / 100;
+}
+
 
 void simulation()
 {
@@ -120,11 +128,7 @@ void simulation()
         ++month;
         if (month == 13)
         {
-            double min = 5.5, max = 6.4;
-            inflation = (double)rand() / RAND_MAX * (max - min) + min;
-            Alice.food *= inflation / 100;
-            Alice.car.gas *= inflation / 100;
-            Alice.Pushok.cat_food *= inflation / 100;
+            inflation_in_year();
             month = 1;
             ++year;
         }
