@@ -123,10 +123,8 @@ void Kate_car(const int month, const int year)
 
 void Kate_deposite(const int month, const int year)
 {
-    if (year == 2026) Kate.tbank.interest = 14.5;
-    if (year == 2027) Kate.tbank.interest = 13.5;
-    if (year == 2028) Kate.tbank.interest = 12.5;
-    if (year == 2029) Kate.tbank.interest = 11.5;
+    if (month == 12)
+        Kate.tbank.interest -= 0.1;
 
     Kate.tbank.deposite += Kate.tbank.deposite * (Kate.tbank.interest  / 12.0 / 100.0);
 
