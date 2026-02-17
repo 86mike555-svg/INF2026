@@ -29,11 +29,6 @@ struct Person {
 
 Person Alice;
 
-const RUB emergency_fund = 250'000; // Сумма, которую Алиса считает достаточной для покрытия непредвиденных расходов
-
-double inflation_month = (10 / 100.0 / 12.0); // Месячная инфляция
-double deposit_month = (14.5 / 100.0 / 12.0); // Месячные проценты по вкладу
-
 void alice_init() { // Инициализация данных Алисы
 	Alice.Tbank.salary = 100'000; 
 
@@ -50,7 +45,10 @@ void alice_init() { // Инициализация данных Алисы
 }
 
 void alice_inflation_tick() { // Инфляция повышает цены на все товары и услуги
-	Alice.food *= (1.0 + inflation_month); 
+	double inflation_month = (10 / 100.0 / 12.0);
+
+	Alice.food *= (1.0 + inflation_month);
+
 	Alice.car.gas *= (1.0 + inflation_month); 
 	Alice.car.value *= (1.0 + inflation_month); 
 
@@ -59,6 +57,8 @@ void alice_inflation_tick() { // Инфляция повышает цены на
 }
 
 void alice_deposit_interest() { // Алиса получает проценты по вкладу
+	double deposit_month = (14.5 / 100.0 / 12.0);
+
 	Alice.Tbank.deposit += Alice.Tbank.deposit * deposit_month;
 }
 
@@ -102,6 +102,8 @@ void alice_pay_cat_food() { // Алиса платит за еду для кот
 }
 
 void alice_move_money_to_deposit() { // Алиса переводит деньги с карты на вклад, если на карте больше, чем emergency_fund
+	const RUB emergency_fund = 250'000;
+
 	if (Alice.Tbank.card > emergency_fund) {
 		RUB amount = Alice.Tbank.card;
 		Alice.Tbank.card -= amount;
