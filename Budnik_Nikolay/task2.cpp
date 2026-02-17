@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <stdio.h>
 
 using RUB = long long int;
@@ -191,18 +192,25 @@ void simulation()
 
 void print_results()
 {
-    printf("Salary = %lld\n", Alice.salary);
-    printf("Capital = %lld\n", Alice.capital);
+    printf("Main information:\n");
 
-    printf("Bank.account = %lld\n", Alice.bank.account);
-    printf("Bank.deposit = %lld\n", Alice.bank.deposit);
+    // Зарплата и капитал
+    printf("\tSalary = %lld\n", Alice.salary);
+    printf("\tCapital = %lld\n", Alice.capital);
 
-    printf("Food = %lld\n", Alice.food);
-    printf("Car value = %lld\n", Alice.car.value);
-    printf("Car gas = %lld\n", Alice.car.gas);
+    printf("\nOther information:\n");
+
+    // Счет и вклад
+    printf("\tBank account = %lld\n", Alice.bank.account);
+    printf("\tDeposit = %lld\n", Alice.bank.deposit);
+
+    // Другое
+    printf("\tFood = %lld\n", Alice.food);
+    printf("\tCar value = %lld\n", Alice.car.value);
+    printf("\tCar gas = %lld\n", Alice.car.gas);
 
     if (Alice.dog.enabled == 1){
-       printf("Dog's feed = %lld\n", Alice.dog.feed);
+       printf("\tDog's feed = %lld\n", Alice.dog.feed);
 
     }
 }
