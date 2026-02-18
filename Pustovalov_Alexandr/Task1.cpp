@@ -1,62 +1,106 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 
 using Percent = float;
 
 using RUB = long long int;
 using USD = long long int;
+using BTC = double;
 
+struct Economy {
+    Percent inflation;
+    double rate_usd_rub;
+
+    bool crisis;
+};
 
 struct Car {
     RUB value;
     RUB gas;
 };
 
+struct Crypto {
+    BTC balance;
+    double exchange_rate_usd;
+};
+
 
 struct Bank {
     RUB account_rub;
     USD account_usd;
-    float rate_usd_rub;
+    float monthly_loan_payment;
 };
 
+struct Housing {
+    RUB value;
+    RUB rent;
+};
+
+struct Health {
+    short happines;
+    short health;
+    short max_age;
+    bool is_alive;
+};
+
+struct Family
+{
+    bool has_partner;
+    bool has_parents;
+    short children_amount;
+};
 
 struct Person {
     Bank vtb;
-    RUB salary;
-    RUB food;
+    Crypto crypto_account;
     Car car;
+    Housing home;
+
+    RUB salary;
+    RUB monthly_food_cost;
+    RUB monthly_lifestyle_cost;
+
+    Health health;
+    Family family;
+    
 };
+
+struct Economy russia;
 struct Person alice;
+struct Person bogdan;
 
-
-void alice_init()
+void init()
 {
-    alice.vtb.rate_usd_rub = 78.76;
+    // Global
+    Russia_economy.rate_usd_rub = 78.76;
+
+    // Alice
     alice.vtb.account_rub = 0;
     alice.vtb.account_usd = 1'000;
 
     alice.salary = 180'000;
     alice.food = 3'000;
 
-    alice.car.value = 2'400'0;
+    alice.car.value = 2'400'000;
     alice.car.gas = 15'000;
+
+    // Bogdan
+
 }
 
+double get_random(double min, double max) {
+    return min + (double)(rand()) / ((double)(RAND_MAX / (max - min)));
+}
 
-void alice_food(const int month, const int year)
+void alice_expenses(const int month, const int year)
 {
     if (month == 12) alice.vtb.account_rub -= 2000;  // christmas party
 
-    Percent inflation = 12.0;
-    switch (year) {
-    case 2026: inflation = 12.5; break;
-    case 2027: inflation = 14.0; break;
-    case 2028: inflation = 13.0; break;
-    case 2029: inflation = 11.5; break;
-    }
-    alice.food += alice.food * (inflation / 100. / 12.);
+    Percent inflation = 0.75;
+}
+alice.food += alice.food * (inflation / 100. / 12.);
 
-    alice.vtb.account_rub -= alice.food;
+alice.vtb.account_rub -= alice.food;
 }
 
 
@@ -97,14 +141,24 @@ void simulation()
     int year = 2026;
     int month = 2;
 
-    while (!(year == 2027 && month == 2)) {
-        alice_salary(month, year);
-        alice_car();
-        // my_cat();
-        // my_trip();
-        // my_rent();
-        // my_mortgage();
-        alice_food(month, year);
+    while (alice.is_alive && bogdan.is_alive) ) {
+        // World
+
+        // Alice
+        if (alice.is_alive) {
+            alice_salary(month, year);
+            alice_car();
+            // my_cat();
+            // my_trip();
+            // my_rent();
+            // my_mortgage();
+            alice_expenses(month, year);
+        }
+
+        //Bogdan
+        if (bogdan.is_alive) {
+            bogdan_salary(month, year);
+        }
 
         ++month;
         if (month == 13) {
@@ -117,7 +171,7 @@ void simulation()
 
 int main()
 {
-    alice_init();
+    init();
     simulation();
     print_results();
 }
