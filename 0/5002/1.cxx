@@ -38,7 +38,7 @@ void alice_init()
     alice.salary = 180'000;
     alice.food = 3'000;
 
-    alice.car.value = 2'400'000;
+    alice.car.value = 2'400'0;
     alice.car.gas = 15'000;
 }
 
