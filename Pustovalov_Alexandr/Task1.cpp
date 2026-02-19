@@ -35,7 +35,7 @@ struct Loan {
 struct Bank {
     RUB account_rub;
     USD account_usd;
-    
+
     Loan mortgage;
     Loan consumer_credit;
 };
@@ -49,6 +49,7 @@ struct Housing {
 struct Health {
     short happines;
     short physical_health;
+    short age;
     short max_age;
     bool is_alive;
 };
@@ -73,12 +74,15 @@ struct Person {
 
     Health health;
     Family family;
-    
+
 };
 
 struct Economy russia;
 struct Person alice;
 struct Person bogdan;
+
+int year = 2026;
+int month = 2;
 
 void init()
 {
@@ -109,7 +113,7 @@ void init()
     alice.monthly_food_cost = 25'000;
     alice.monthly_lifestyle_cost = 30'000;
 
-    alice.health = { 85, 90, 80, true };
+    alice.health = { 85, 90, 20, 80, true };
     alice.family = { false, true, 0 };
 
     // Bogdan
@@ -128,10 +132,10 @@ void init()
     bogdan.home.value = 0;
     bogdan.home.rent = 50'000;
 
-    bogdan.monthly_food_cost = 60'000;
-    bogdan.monthly_lifestyle_cost = 100'000;
+    bogdan.monthly_food_cost = 60'000; //healthy food
+    bogdan.monthly_lifestyle_cost = 20'000;
 
-    bogdan.health = { 60, 95, 80, true };
+    bogdan.health = { 60, 95, 20, 80, true };
     bogdan.family = { false, true, 0 };
 }
 
@@ -165,27 +169,31 @@ void alice_salary(const int month, const int year)
 void bogdan_salary(const int month, const int year)
 {
     if (month == 3) {
-        alice.salary *= 1.5;
+        bogdan.salary *= 1.5;
     }
 
     if (month == 2 && year == 2026) {
-        alice.vtb.account_rub += 5000;  // bonus
+        bogdan.vtb.account_rub += 5000;  // bonus
     }
 
-    alice.vtb.account_rub += alice.salary;
+    bogdan.vtb.account_rub += bogdan.salary;
 }
 
+void bogdan_life_prolongation() {
+    bogdan.vtb.account_usd -= 100'000;
+    bogdan.health.max_age += 3;
+}
 
 void print_results()
 {
-    printf("Salary = %lld\n", alice.salary);
-
-    RUB capital = 0;
-    capital += alice.vtb.account_rub;
-    capital += alice.vtb.account_usd * russia.rate_usd_rub;
-    capital += alice.car.value;
-    capital += alice.home.value;
-    printf("Capital = %lld", capital);
+    printf("Simulation ended in year %d. Alice died in age of %d. Bogdan died in age of %d\n", year, alice.health.max_age, bogdan.health.max_age);
+    printf("Alice Salary at the end of her life was %lld\nMeanwile Bogdan salary was %lld\n", alice.salary, bogdan.salary);
+    int capital_bogdan = bogdan.car.value + bogdan.crypto_account.balance * bogdan.crypto_account.exchange_rate_usd + bogdan.home.value +
+        bogdan.vtb.account_rub + bogdan.vtb.account_usd * russia.rate_usd_rub;
+    int capital_alice = alice.car.value + alice.crypto_account.balance * alice.crypto_account.exchange_rate_usd + alice.home.value +
+        alice.vtb.account_rub + alice.vtb.account_usd * russia.rate_usd_rub;
+    printf("Alice finished with great capital of %d\nAnd Bogdan's capital wasn't small too: %d\n", capital_alice, capital_bogdan);
+    printf("But who was really happy in the end of his life Alice: %d or Bogdan: %d?\n", alice.health.happines, bogdan.health.happines);
 }
 
 
@@ -195,18 +203,19 @@ void alice_car(const int month)
     if (month == 2) alice.vtb.account_rub -= alice.car.yearly_tax;
 }
 
-void world_events() 
+void world_events()
 {
+
+}
+
+void mortgage() {
 
 }
 
 
 void simulation()
 {
-    int year = 2026;
-    int month = 2;
-
-    while (alice.health.is_alive && bogdan.health.is_alive) {
+    while (alice.health.is_alive || bogdan.health.is_alive) {
         // World
         world_events();
 
@@ -217,19 +226,24 @@ void simulation()
             // my_cat();
             // my_trip();
             // my_rent();
-            // my_mortgage();
+            mortgage();
             alice_expenses(month, year, russia);
         }
 
         //Bogdan
         if (bogdan.health.is_alive) {
             bogdan_salary(month, year);
+
         }
 
         ++month;
         if (month == 13) {
             ++year;
+            ++alice.health.age;
+            ++bogdan.health.age;
             month = 1;
+            if (alice.health.age == alice.health.max_age) alice.health.is_alive = false;
+            if (bogdan.health.age == bogdan.health.max_age) bogdan.health.is_alive = false;
         }
     }
 }
