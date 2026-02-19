@@ -2097,6 +2097,7 @@ void print_history(const Person &p)// история баланса
     }
 }
 
+
 void print_results(const Person &p)
 {
     printf("\n========== %s RESULTS ==========\n", p.name.c_str());
