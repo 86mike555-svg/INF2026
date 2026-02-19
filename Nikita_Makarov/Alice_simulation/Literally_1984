@@ -1,0 +1,212 @@
+#include <stdio.h>
+
+
+using GBP = long long int;
+// GBP is Great Britain Pound
+using DATE = int;
+
+
+struct Bike {
+
+    GBP value;
+    GBP gas;
+    GBP insurance;
+};
+
+
+struct Home {
+
+    GBP value;
+    GBP utilities;
+    GBP rent_room;
+};
+
+
+struct Person {
+
+    GBP salary;
+    GBP boosty;
+    GBP deposit;
+    GBP food;
+    GBP footwear;
+    GBP razors;
+    GBP vpn;
+    GBP gym;
+
+    Bike bike;
+    Home home;
+
+    GBP goose;
+    // goose is pet...
+
+    GBP capital;
+};
+struct Person winston;
+
+
+void winston_init(){
+
+    winston.deposit = 10;
+    winston.food = 190; // inf
+    winston.vpn = 30; // inf
+    winston.footwear = 75; // inf
+    winston.razors = 10; // inf
+    winston.gym = 50; // inf
+
+    winston.goose = 240; // inf
+
+    winston.salary = 1000;
+    winston.boosty = 5; 
+    // "second job"
+
+    winston.bike.value = 8'500;
+    winston.bike.gas = 95; // inf
+    winston.bike.insurance = 500; 
+    // insurance is ony in the last month of the year
+
+    winston.home.value = 45'000;
+    winston.home.utilities = 110; // inf
+    winston.home.rent_room = 20;
+}
+
+
+void winston_job(int month, int year, int flag, int month_job_off, int year_job_off){
+
+    if (month != 0){
+        winston.boosty += 15;
+    }
+
+    winston.deposit += winston.boosty;
+    winston.deposit += winston.salary;
+}
+
+
+void winston_bike(const int month){
+
+    winston.deposit -= winston.bike.gas;
+
+    if (month == 13){
+        winston.deposit -= winston.bike.insurance;
+    }
+}
+
+
+void winston_needs(){
+
+    winston.deposit -= winston.food;
+    winston.deposit -= winston.vpn;
+    winston.deposit -= winston.footwear;
+    winston.deposit -= winston.razors;
+    winston.deposit -= winston.gym;
+}
+
+
+void winston_pet(){
+
+    winston.deposit -= winston.goose;
+}
+
+
+void winston_houses(const int month, const int year){
+
+    if (month == 6 and year >= 1984){
+        winston.deposit -= winston.home.rent_room;
+        winston.deposit -= winston.home.utilities;
+    }
+
+    else{
+        winston.deposit -= winston.home.utilities;
+    }
+}
+
+
+void winston_capital(){
+
+    winston.capital += winston.deposit;
+    winston.capital += winston.home.value;
+    winston.capital += winston.bike.value;
+}
+
+
+void commodity_inflation(const int month){ // inf
+
+    if (month == 1){
+        winston.food *= 1.09;
+        winston.vpn *= 1.1;
+        winston.footwear *= 1.04;
+        winston.razors *= 1.25;
+        winston.gym *= 1.1;
+        winston.goose *= 1.07;
+        winston.bike.gas *=1.05;
+        winston.home.utilities *= 1.05;
+    }
+}
+
+
+void print_results(){
+
+    printf("*------money------* \n");
+    printf("Capital = %lld\n", winston.capital);
+    printf("Deposit = %lld\n", winston.deposit);
+    printf("'Second job' = %lld\n", winston.boosty);
+
+    printf("*------needs------* \n");
+    printf("food = %lld\n", winston.food);
+    printf("vpn = %lld\n", winston.vpn);
+    printf("footwear = %lld\n", winston.footwear);
+    printf("razors = %lld\n", winston.razors);
+    printf("gym = %lld\n", winston.gym);
+    printf("goose = %lld\n", winston.goose);
+    printf("gas = %lld\n", winston.bike.gas);
+    printf("utilities = %lld\n", winston.home.utilities);
+}
+
+
+void winston_simulation(){
+
+    DATE year = 1984;
+    DATE month = 4;
+    DATE year_job_off = 0;
+    DATE month_job_off = 0;
+
+    int flag = 0;
+
+    while( !(year == 2000 and month == 13) ) {
+        winston_job(month, year, flag, month_job_off, year_job_off);
+        winston_bike(month);
+        winston_needs();
+        winston_pet();
+        winston_houses(month, year);
+        commodity_inflation(month);
+        
+        month += 1;
+        if (month == 14){
+            // in 1 year 13 month per 28 days. Because I can ;)
+            ++year;
+            month = 1;
+        }
+
+        if (winston.boosty >= winston.salary and flag == 0){
+        winston.salary = 0;
+        month_job_off = month;
+        year_job_off = year;
+
+        printf("*-------job-------* \n");
+        printf("The day Winston quit his job = %d.%d\n", month_job_off, year_job_off);
+
+        flag = 1;
+        }
+    }
+
+    winston_capital();
+}
+
+
+int main(){
+
+    winston_init();
+
+    winston_simulation();
+
+    print_results();
+}
