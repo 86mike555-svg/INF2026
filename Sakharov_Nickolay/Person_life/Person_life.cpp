@@ -2087,7 +2087,7 @@ void simulate_bob()
     }
 }
 
-void print_history(const Person &p)
+void print_history(const Person &p)// история баланса
 {
     printf("\n--- %s History ---\n", p.name.c_str());
     printf("Month\tBalance\tDeposit\tNet Worth\n");
