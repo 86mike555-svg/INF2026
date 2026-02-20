@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 
+
 using Percent = float;
 
 using RUB = long long int;
@@ -16,6 +17,7 @@ const std::vector<double> BTC_RATES = {
     100000.0, 85000.0, 70000.0, 150000.0
 };
 
+
 struct Economy {
     Percent inflation;
     double rate_usd_rub;
@@ -24,16 +26,19 @@ struct Economy {
     bool crisis;
 };
 
+
 struct Car {
     RUB value;
     RUB gas;
     RUB yearly_tax;
 };
 
+
 struct Crypto {
     BTC balance;
     double exchange_rate_usd;
 };
+
 
 struct Loan {
     RUB body_debt;
@@ -41,6 +46,7 @@ struct Loan {
     Percent interest_rate;
     bool is_active;
 };
+
 
 struct Bank {
     RUB account_rub;
@@ -50,11 +56,13 @@ struct Bank {
     Loan consumer_credit;
 };
 
+
 struct Housing {
     RUB value;
     RUB rent;
     RUB monthly_utilities;
 };
+
 
 struct Health {
     short happines;
@@ -65,12 +73,14 @@ struct Health {
     bool is_alive;
 };
 
+
 struct Family
 {
     bool has_partner;
     bool has_parents;
     short children_amount;
 };
+
 
 struct Person {
     Bank vtb;
@@ -95,6 +105,7 @@ struct Person bogdan;
 int year = 2026;
 int month = 2;
 int simulation_month_counter = 0;
+
 
 void init()
 {
@@ -155,9 +166,11 @@ void init()
     bogdan.family = { false, true, 0 };
 }
 
+
 double get_random(double min, double max) {
     return min + (double)(rand()) / ((double)(RAND_MAX / (max - min)));
 }
+
 
 void update_crypto_rates() {
     int index = simulation_month_counter % BTC_RATES.size();
@@ -167,6 +180,8 @@ void update_crypto_rates() {
     alice.crypto_account.exchange_rate_usd = current_rate + noise;
     bogdan.crypto_account.exchange_rate_usd = current_rate + noise;
 }
+
+
 bool try_spend(Person& p, RUB amount) {
     if (amount <= 0) return true;
 
@@ -207,6 +222,7 @@ bool try_spend(Person& p, RUB amount) {
     return false;
 }
 
+
 void alice_expenses(const int month, const int year, const Economy rus_economy)
 {
     RUB extra = (month == 12) ? 2000 : 0;
@@ -219,6 +235,7 @@ void alice_expenses(const int month, const int year, const Economy rus_economy)
     }
 }
 
+
 void do_inflation() {
     alice.monthly_food_cost += alice.monthly_food_cost * (russia.inflation / 100.);
     alice.monthly_lifestyle_cost *= (1.0 + russia.inflation / 100.0);
@@ -228,6 +245,7 @@ void do_inflation() {
     bogdan.monthly_lifestyle_cost *= (1.0 + russia.inflation / 100.0);
     bogdan.home.monthly_utilities *= (1.0 + russia.inflation / 100.0);
 }
+
 
 void alice_salary(const int month, const int year)
 {
@@ -241,6 +259,7 @@ void alice_salary(const int month, const int year)
 
     alice.vtb.account_rub += alice.salary;
 }
+
 
 void bogdan_salary(const int month, const int year)
 {
@@ -257,6 +276,7 @@ void bogdan_salary(const int month, const int year)
 
     bogdan.vtb.account_rub += bogdan.salary;
 }
+
 
 void bogdan_life_prolongation()
 {
@@ -276,6 +296,7 @@ void bogdan_life_prolongation()
         }
     }
 }
+
 
 void bogdan_expenses(const int month, const int year)
 {
@@ -297,6 +318,7 @@ void bogdan_expenses(const int month, const int year)
     }
 }
 
+
 void print_results()
 {
     printf("Simulation ended in year %d. Alice died in age of %d. Bogdan died in age of %d\n", year, alice.health.max_age, bogdan.health.max_age);
@@ -317,6 +339,7 @@ void alice_car(const int month)
     if (month == 2) alice.vtb.account_rub -= alice.car.yearly_tax;
 }
 
+
 void world_events()
 {
     russia.crisis = (get_random(1, 200) == 100);
@@ -331,6 +354,7 @@ void world_events()
     }
 }
 
+
 void random_events(Person& p)
 {
     if (p.family.has_parents && get_random(0, 100) < 5) {
@@ -343,6 +367,7 @@ void random_events(Person& p)
         p.family.has_parents = false; //No parents :(
     }
 }
+
 
 void alice_mortgage() {
     double interest_part = alice.vtb.mortgage.body_debt * (alice.vtb.mortgage.interest_rate / 1200.0);
@@ -364,6 +389,7 @@ bool try_find_partner(const short age, const int salary) {
     return get_random(1, 100) + salary_bonus - age_penalty > 95;
 }
 
+
 void check_family_expansion(Person& p, int year) {
     if (p.family.has_partner && p.health.age > 25 && p.health.age < 45) {
         int chance = 99;
@@ -375,6 +401,7 @@ void check_family_expansion(Person& p, int year) {
         }
     }
 }
+
 
 void simulation()
 {
