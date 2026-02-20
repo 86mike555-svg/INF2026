@@ -7,6 +7,11 @@ using RUB = long long int;
 using USD = long long int;
 
 
+struct Cat {
+    RUB cfood;
+};
+
+
 struct Car {
     RUB value;
     RUB gas;
@@ -24,7 +29,7 @@ struct Person {
     Bank vtb;
     RUB salary;
     RUB food;
-    RUB cat_food
+    Cat cat;
     Car car;
 };
 struct Person alice;
@@ -35,10 +40,10 @@ void alice_init()
     alice.vtb.rate_usd_rub = 78.76;
     alice.vtb.account_rub = 0;
     alice.vtb.account_usd = 1'000;
-    
     alice.salary = 180'000;
+    
     alice.food = 3'000;
-    alice.cat.food = 2000
+    alice.cat.cfood = 2000;
 
     alice.car.value = 2'400'0;
     alice.car.gas = 15'000;
@@ -59,6 +64,21 @@ void alice_food(const int month, const int year)
     alice.food += alice.food * (inflation / 100. / 12.);
         
     alice.vtb.account_rub -= alice.food;
+}
+
+
+void alice_cat(const int month, const int year)
+{
+    Percent inflation = 12.0;
+    switch (year) {
+    case 2026: inflation = 12.5; break;
+    case 2027: inflation = 14.0; break;
+    case 2028: inflation = 12.0; break;
+    case 2029: inflation = 11.5; break;
+    }
+    alice.cat.cfood += alice.cat.cfood * (inflation / 100. / 12.);
+        
+    alice.vtb.account_rub -= alice.cat.cfood;
 }
 
 
@@ -94,21 +114,6 @@ void alice_car()
 }
 
 
-void alice_cat(const int month, const int year)
-{
-    Percent inflation = 12.0;
-    switch (year) {
-    case 2026: inflation = 12.5; break;
-    case 2027: inflation = 14.0; break;
-    case 2028: inflation = 12.0; break;
-    case 2029: inflation = 11.5; break;
-    }
-    alice.cat.food += alice.cat.food * (inflation / 100. / 12.);
-        
-    alice.vtb.account_rub -= alice.cat.food;
-}
-
-
 void simulation()
 {
     int year = 2026;
@@ -117,7 +122,7 @@ void simulation()
     while ( !(year == 2027 && month == 2) ) {
         alice_salary(month, year);
         alice_car();
-        alice_cat();
+        alice_cat(month, year);
         // my_trip();
         // my_rent();
         // my_mortgage();
