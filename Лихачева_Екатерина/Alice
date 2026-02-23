@@ -1,110 +1,159 @@
 #include <stdio.h>
 
 using RUB = long long int; 
+struct Mall{
+    RUB clothes;
+    RUB shoes;
+    RUB accessories;
+};
 
 struct Car {
     RUB value;
     RUB gas;
 };
 
+struct Real_estate {
+    RUB apartment1;
+    RUB apartment2;
+    RUB apartment3;
+    RUB villa;
+};
+
 struct Cat {
-    RUB cat_food;
-    RUB cat_vet;
-    RUB cat_toys;
+    RUB food;
+    RUB vet;
+    RUB toys;
+};
+
+struct Bank {
+    RUB salary;
+    RUB rent;
+    RUB account;
+    RUB deposit;
+    float pp = 14.5;
 };
 
 struct Person { 
-    RUB salary;
-    RUB capital;
     RUB food;
-    RUB account;
-    RUB deposit;
+    RUB capital; 
+    struct Mall mall;
+    struct Real_estate real_estate;
+    struct Bank sber;
     struct Car car;
     struct Cat cat;
 };
 struct Person Alice;
 
-float pp = 14.5; 
-
-void alice_salary(const int month, const int year) 
+void alice_income(const int month, const int year) 
 { 
+    Alice.sber.account += Alice.sber.rent;
+
     if ((month == 8) && (year == 2026)) { 
-        Alice.salary *= 1.5; 
+        Alice.sber.salary *= 1.5; 
     } 
 
-    Alice.capital += Alice.salary;
-    Alice.capital += Alice.deposit * (pp / 12.0 / 100.0);
-    Alice.account += Alice.salary;
+    Alice.sber.account += Alice.sber.salary;
 
+}
+
+void alice_deposit()
+{
+    Alice.sber.deposit += Alice.sber.deposit * (Alice.sber.pp / 12.0 / 100.0);
+    Alice.sber.deposit += Alice.sber.account;
+    Alice.sber.account = 0;
+}
+
+void alice_capital() 
+{
+    Alice.capital += Alice.car.value; 
+    Alice.capital += Alice.real_estate.apartment1;
+    Alice.capital += Alice.real_estate.apartment2;
+    Alice.capital += Alice.real_estate.apartment3;
+    Alice.capital += Alice.real_estate.villa;
 }
 
 void print_result() 
 { 
-    printf("Salary = %lld\n", Alice.salary);
+    printf("Salary = %lld\n", Alice.sber.salary);
     printf("Capital = %lld\n", Alice.capital);
-    printf("Deposit = %lld\n", Alice.deposit);
-    printf("Account = %lld", Alice.account);
-}
-
-// void  alice_bank_interest() 
-// {
-//     Alice.capital += Alice.capital * (pp / 12.0 / 100.0); 
-// }
-
-void alice_bank_account()
-{
-    Alice.deposit += Alice.account;
-    Alice.deposit += Alice.deposit * (pp / 12.0 / 100.0);
-    Alice.account = 0;
+    printf("Deposit = %lld\n", Alice.sber.deposit);
+    printf("Account = %lld", Alice.sber.account);
 }
 
 void alice_food() 
 {
-    Alice.account -= Alice.food;
+    Alice.sber.account -= Alice.food;
+}
+
+void alice_mall() 
+{
+    Alice.sber.account -= Alice.mall.accessories;
+    Alice.sber.account -= Alice.mall.clothes;
+    Alice.sber.account -= Alice.mall.shoes;
 }
 
 void alice_cat()
 {
-    Alice.account -= Alice.cat.cat_food;
-    Alice.account -= Alice.cat.cat_toys;
-    Alice.account -= Alice.cat.cat_vet;
+    Alice.sber.account -= Alice.cat.food;
+    Alice.sber.account -= Alice.cat.toys;
+    Alice.sber.account -= Alice.cat.vet;
 }
 
 void alice_car()
 {
-    Alice.account -= Alice.car.gas;
+    Alice.sber.account -= Alice.car.gas;
 }
 
 void inflation() 
 {
     Alice.food *= 1.06;
 
+    Alice.real_estate.apartment1 *= 1.06;
+    Alice.real_estate.apartment2 *= 1.06;
+    Alice.real_estate.apartment3 *= 1.06;
+    Alice.real_estate.villa *= 1.06;
+
     Alice.car.value *= 1.06;
     Alice.car.gas *= 1.06;
 
-    Alice.cat.cat_food *= 1.06;
-    Alice.cat.cat_toys *= 1.06;
-    Alice.cat.cat_vet *= 1.06; 
+    Alice.cat.food *= 1.06;
+    Alice.cat.toys *= 1.06;
+    Alice.cat.vet *= 1.06; 
+
+    Alice.mall.accessories *= 1.06;
+    Alice.mall.clothes *= 1.06;
+    Alice.mall.shoes *= 1.06;
 }
 
 void indexation()
 {
-    Alice.salary *= 1.07;
+    Alice.sber.salary *= 1.07;
+    Alice.sber.rent *= 1.07;
 }
 
 void alice_innit() 
 {
-    Alice.account = 0;
+    Alice.sber.account = 0;
     Alice.capital = 0;
-    Alice.salary = 180'000;
-    Alice.food = 20'000;
+    Alice.sber.salary = 180'000;
+    Alice.sber.rent = 230'000;
+    Alice.food = 34'000;
+
+    Alice.real_estate.apartment1 = 23'000'000;
+    Alice.real_estate.apartment2 = 9'000'000;
+    Alice.real_estate.apartment3 = 12'000'000;
+    Alice.real_estate.villa = 43'000'000;
 
     Alice.car.value = 2'400'000;
-    Alice.car.gas = 15'000;
+    Alice.car.gas = 17'000;
 
-    Alice.cat.cat_food = 10'000;
-    Alice.cat.cat_toys = 7'000;
-    Alice.cat.cat_vet = 5'000;
+    Alice.cat.food = 10'000;
+    Alice.cat.toys = 7'000;
+    Alice.cat.vet = 5'000;
+
+    Alice.mall.accessories = 7'000;
+    Alice.mall.clothes = 60'000;
+    Alice.mall.shoes = 70'000;
 
 }
 
@@ -116,21 +165,26 @@ void simulation()
 
     while ( !((month == 3) && (year == 2057)) ) {
 
-        alice_salary(month, year);
-        // alice_bank_interest();
+        alice_income(month, year);
+        alice_mall();
         alice_cat();
         alice_food();
         alice_car();
-        alice_bank_account();
+        alice_deposit();
+
+        if (month == 12) {
+            inflation();
+            indexation();            
+        }
 
         ++month;
         if (month == 12) {
-            inflation();
-            indexation();
             month = 1;
             ++year;
         }
     }
+
+    alice_capital();
 }
 
 int main()
