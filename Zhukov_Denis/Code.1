@@ -1,49 +1,303 @@
 #include <stdio.h>
+#include <Windows.h>
+#include <clocale>
 
 using RUB = long long int;
+using percent = float;
 
-struct Person // все функции, связанные с персонами
+
+struct bank
 {
-	RUB capital;
+	RUB account;
+	RUB deposit;
+	percent interest;
+};
+
+
+struct transport
+{
+	RUB gaz;
+	RUB value;
+};
+
+
+struct house
+{
+	RUB h_price; // цена дома
+	percent credit;
+	double rate;
+	bool has_house;
+	bool has_credit; // условия для покупки дома и выплаты кредита
+	RUB payment;
+	RUB down_payment;
+	RUB debt;
+};
+
+
+
+struct Person
+{
+	bank vtb;
+
 	RUB salary;
 	RUB food;
 	RUB cat;
+	RUB dog;
 	RUB rent;
 
+	transport car;
+	transport metro;
 
-	void salary_bill(int month) // подсчёт зарплаты
-	{
-		if (month == 12)
-		{
-			capital += salary; // 13-я зарплата
-		}
-		capital += salary;
-	}
-
-
-	void wastes() // подсчёт затрат
-	{
-		capital -= food;
-		capital -= cat;
-		capital -= rent;
-	}
+	house House;
 };
+
+
+struct Person Biba;
+struct Person Boba;
+
+
+void Biba_init()
+{
+	Biba.vtb.account = 0;
+	Biba.salary = 150'000;
+	Biba.vtb.deposit = 1'000'000;
+	Biba.vtb.interest = 8;
+
+	Biba.food = 20'000;
+	Biba.rent = 30'000;
+	Biba.cat = 0; // кота нет
+	Biba.dog = 10'000;
+
+	Biba.car.value = 2'400'000;
+	Biba.car.gaz = 8'000;
+
+	Biba.House.has_house = false;
+	Biba.House.has_credit = false;
+}
+
+
+void Boba_init()
+{
+	Boba.vtb.account = 0;
+	Boba.salary = 80'000;
+	Boba.vtb.deposit = 300'000;
+	Boba.vtb.interest = 8;
+
+	Boba.food = 20'000;
+	Boba.cat = 10'000;
+	Boba.dog = 0; // пса нет
+	Boba.rent = 25'000;
+
+	Boba.metro.gaz = 3'000;
+}
+
+
+void Biba_salary(const int month, const int year)
+{
+	if (month == 12)
+	{
+		Biba.vtb.account += Biba.salary; // 13-я зарплата
+	}
+
+	if (month == 5 and year == 2044)
+	{
+		Biba.salary += 30'000; // повышение
+	}
+	Biba.vtb.account += Biba.salary;
+}
+
+
+void Boba_salary(const int month, const int year)
+{
+	if (month == 12)
+	{
+		Boba.vtb.account += Boba.salary; // 13-я зарплата
+	}
+
+	if (month == 5 and year == 2040)
+	{
+		Boba.salary += 20'000; // повышение
+	}
+	Boba.vtb.account += Boba.salary;
+}
+
+
+void Biba_wastes()
+{
+	Biba.vtb.account -= Biba.food;
+	Biba.vtb.account -= Biba.rent;
+	// кота нет
+	Biba.vtb.account -= Biba.dog;
+
+	Biba.vtb.account -= Biba.car.gaz;
+}
+
+
+void Boba_wastes()
+{
+	Boba.vtb.account -= Boba.food;
+	Boba.vtb.account -= Boba.cat;
+	// пса нет
+	Boba.vtb.account -= Boba.rent;
+	Boba.vtb.account -= Boba.metro.gaz;
+}
+
+
+void Biba_buy_house(int month, int year) // покупка дома
+{
+	if (!Biba.House.has_house and 
+		Biba.vtb.deposit >= 4'000'000 and 
+		month == 10 and year == 2040)
+	{
+		// покупка дома
+		Biba.House.h_price = 15'000'000;
+		Biba.House.down_payment = 2'000'000;
+
+		// первый взнос с депозита
+		Biba.vtb.deposit -= Biba.House.down_payment;
+
+		Biba.House.has_house = true;
+		Biba.House.has_credit = true;
+		Biba.House.debt = Biba.House.h_price - Biba.House.down_payment;
+
+		// вычисление процента по кредиту
+		Biba.House.credit = 14;
+		Biba.House.rate = Biba.House.credit / 12.0 / 100.0;
+
+		double k = 1;
+		for (int i = 0; i < 30*12; i++) // кредит на 30 лет
+		{
+			k *= 1 + Biba.House.rate;
+		}
+		Biba.House.payment = (Biba.House.debt * Biba.House.rate * k) / (k - 1);
+	}
+}
+
+
+void Biba_credit()
+{
+	if (Biba.House.has_credit and Biba.House.debt > 0)
+	{
+		if (Biba.vtb.deposit >= Biba.House.payment)
+		{
+			Biba.vtb.deposit -= Biba.House.payment;
+
+			// уменьшение долга на сумму основного долга (платеж минус проценты)
+			Biba.House.debt -= Biba.House.payment -
+				(Biba.House.debt * (Biba.House.credit / 12.0 / 100.0));
+
+			if (Biba.House.debt < 0) Biba.House.debt = 0;
+
+			if (Biba.House.debt <= 0)
+			{
+				Biba.House.has_credit = false;
+				printf("Ипотека выплачена!\n\n");
+			}
+		}
+
+		else
+		{
+			//здесь можно добавить штраф за просрочку
+		}
+	}
+}
+
+void Biba_deposite(const int month, const int year)
+{
+	if (year > 2045) Biba.vtb.interest = 8;
+	else if (year > 2040) Biba.vtb.interest = 7.5;
+	else Biba.vtb.interest = 7.8;
+
+	Biba.vtb.deposit += Biba.vtb.deposit * (Biba.vtb.interest / 12 / 100.0);
+
+	Biba.vtb.deposit += Biba.vtb.account; //остаток положил в депозит
+	Biba.vtb.account = 0;
+}
+
+
+void Boba_deposite(const int month, const int year)
+{
+	if (year > 2045) Boba.vtb.interest = 8;
+	else if (year > 2040) Boba.vtb.interest = 7.5;
+	else Boba.vtb.interest = 7.8;
+
+	Boba.vtb.deposit += Boba.vtb.deposit * (Boba.vtb.interest / 12 / 100.0);
+
+	Boba.vtb.deposit += Boba.vtb.account;
+	Boba.vtb.account = 0;
+}
+
+
+void five_year_result(const int year, const int month)
+{
+	if (year % 5 == 0 and month == 12)
+	{
+		printf("Год: %d\n\n", year);
+		printf("Депозит Бибы: %lld\n", Biba.vtb.deposit);
+		if (Biba.House.credit)
+		{
+			printf("Остаток долга: %lld\n\n", Biba.House.debt);
+		}
+		else
+		{
+			printf("Дом не куплен\n\n");
+		}
+
+		printf("Депозит Бобы: %lld\n\n", Boba.vtb.deposit);
+	}
+}
+
+
+void result()
+{
+	printf("=== РЕЗУЛЬТАТ ===\n\n");
+	printf("Зарплата Бибы на 2050: %lld\n", Biba.salary);
+
+	// накопления Бибы
+	RUB capital = 0;
+	capital += Biba.vtb.account;
+	capital += Biba.vtb.deposit;
+	capital += Biba.car.value;
+	capital += (Biba.House.h_price - Biba.House.debt);
+	printf("Капитал Бибы на 2050: %lld\n\n", capital);
+
+	printf("Зарплата Бобы на 2050: %lld\n", Boba.salary);
+
+	// накопления Бобы
+	capital = 0;
+	capital += Boba.vtb.account;
+	capital += Boba.vtb.deposit;
+	printf("Капитал Бобы на 2050: %lld\n", capital);
+}
 
 
 int main()
 {
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	setlocale(LC_ALL, "Russian");
+
+	printf("=== НАЧАЛО СИМУЛЯЦИИ ===\n\n");
+
 	int month = 3;
 	int year = 2030;
-	Person Alex{ 0, 150'000, 20'000, 0, 30'000 }; // капитал, зарплата, затраты на еду, кота (кота нет), аренду жилья.
-	Person Mary{ 0, 80'000, 18'000, 10'000, 25'000 };
+
+	Biba_init();
+	Boba_init();
 
 	while (not (month == 3 and year == 2050))
 	{
-		Alex.salary_bill(month);
-		Alex.wastes();
+		Biba_salary(month, year);
+		Biba_wastes();
 
-		Mary.salary_bill(month);
-		Mary.wastes();
+		Biba_buy_house(month, year);
+		Biba_credit();
+
+		Biba_deposite(month, year);
+
+		Boba_salary(month, year);
+		Boba_wastes();
+		Boba_deposite(month, year);
 
 		month++;
 		if (month == 13)
@@ -51,10 +305,11 @@ int main()
 			year++;
 			month = 1;
 		}
+
+		five_year_result(year, month);
 	}
 
-	printf("Alex capital on 2050 = %lld\n", Alex.capital);
-	printf("Alex salary on 2050 = %lld\n", Alex.salary);
-	printf("Mary capital on 2050 = %lld\n", Mary.capital);
-	printf("Mary salary on 2050 = %lld\n", Mary.salary);
+	result();
+
+	return 0;
 }
