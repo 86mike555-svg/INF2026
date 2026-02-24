@@ -97,7 +97,7 @@ void pair_init()
     davis.tb.account = 0;
     davis.tb.deposite = 10'000;
     davis.tb.interest = 14.5;
-    davis.salary = 150'000;
+    davis.salary = 110'000;
 
     davis.tb.account_eur = 500;
     davis.tb.rate_eur_rub = 90.45;
