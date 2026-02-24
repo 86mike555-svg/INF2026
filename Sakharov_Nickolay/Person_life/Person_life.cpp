@@ -874,7 +874,6 @@ void bob_car_insurance_tax(int month)
         Bob.bank.balance -= apply_yearly_inflation(Bob.car.tax_year, inf_tax);
     }
 }
-
 void bob_car_tires(int month)
 {
     double inf = random_inflation(5.0, 6.0);
@@ -1424,6 +1423,7 @@ void alice_misc()
     {
         Alice.bank.balance -= apply_monthly_inflation(Alice.misc.dating_sites, inf);
     }
+    //k
 }
 void bob_monthly_events(){
     double inf = random_inflation(8.5, 9.7);
