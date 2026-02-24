@@ -1615,7 +1615,7 @@ void alice_init()
     Alice.car.rental_income = 0;
     Alice.car.has_rental = false;
 
-    Alice.cat.name = "Snowball";
+    Alice.cat.name = "Snezhok";
     Alice.cat.color = "white";
     Alice.cat.age = 3;
     Alice.cat.food_month = 6000;
@@ -1844,7 +1844,7 @@ void bob_init()
     Bob.car.rental_income = 0;
     Bob.car.has_rental = false;
 
-    Bob.cat.name = "Shadow";
+    Bob.cat.name = "Mursic";
     Bob.cat.color = "black";
     Bob.cat.age = 5;
     Bob.cat.food_month = 4000;
