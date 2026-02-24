@@ -1423,7 +1423,6 @@ void alice_misc()
     {
         Alice.bank.balance -= apply_monthly_inflation(Alice.misc.dating_sites, inf);
     }
-    //k
 }
 void bob_monthly_events(){
     double inf = random_inflation(8.5, 9.7);
