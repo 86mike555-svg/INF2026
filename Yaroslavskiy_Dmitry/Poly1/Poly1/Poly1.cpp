@@ -136,6 +136,46 @@ void inflation(const int month, const int year)        //функция инфл
 }
 
 
+void calculate_taxes(int year) {                        //ПЛОТИ НОЛОГИ!!!
+    printf("\n--- NALOGOVAYA INSPEKCIYA ZVEROPOLISA (GOD %d) ---\n", year);
+
+    RUB judy_car_tax = (RUB)(judy.car.value * 0.02);        //налог на машину Джуди, зависящий от стоимости
+    judy.zoobank.account -= judy_car_tax;
+    printf("Judy zaplatila nalog na avto: %lld RUB\n", judy_car_tax);
+
+
+    RUB nick_business_tax = (RUB)(nick.Nickizza.investment * 0.05);      //налог на бизнес Ника
+    nick.zoobank.account -= nick_business_tax;
+    printf("Nick zaplatil nalog na biznes: %lld RUB\n", nick_business_tax);
+
+    
+    if (nick.zoobank.account < 0) {         //штраф за незаконную торговлю (если Ник в минусе)
+        nick.fines += 10000;
+        printf("Nick poluchil dopolnitel'nyy shtraf za dolgi.\n");
+    }
+    printf("--------------------------------------------------\n\n");
+}
+
+
+void update_currency_rate(int month, int year)          //обновление курса валюты
+{            
+    float base_rate = 78.5;         // Базовый курс зависит от года (тренд на рост)
+    if (year == 2027) base_rate = 82.0;
+    if (year == 2028) base_rate = 89.5;
+    if (year == 2029) base_rate = 95.0;
+    if (year == 2030) base_rate = 96.5;
+    if (year == 2031) base_rate = 93.0;
+
+    //"случайное" колебание месяца
+    float colebaniye = ((month * 13 + year) % 11) - 5; //колебание от -5 до +5 рублей
+
+    judy.zoobank.rate_usd_rub = base_rate + colebaniye;
+    nick.zoobank.rate_usd_rub = judy.zoobank.rate_usd_rub; // У Ника тот же курс в базе
+
+    printf("  [EXCHANGE MARKET]: Kurs dollara: %.2f RUB\n\n", judy.zoobank.rate_usd_rub);
+}
+
+
 //НИК
 
 void nick_business_logic(const int month, const int year)         //Ник зарабатывает на пицце
@@ -144,19 +184,30 @@ void nick_business_logic(const int month, const int year)         //Ник за�
     nick.zoobank.account += nick.Nickizza.monthly_profit;
 }
 
+void nick_loan_payment()            //платежи Ника по кредиту
+{   
+    if (nick.credit.months_left > 0 && nick.credit.body > 0) {          //проверка, есть ли еще долг и остались ли месяцы
+        
+        RUB principal_payment = nick.credit.body / nick.credit.months_left;             //подсчет, какую часть основного долга гасит в этом месяце
+        RUB interest_payment = (RUB)(nick.credit.body * (nick.credit.interest / 100.0 / 12.0));//       подсчет процентов, которые банк забирает себе "в карман"
+        RUB total_monthly_payment = principal_payment + interest_payment;           //общий платеж, который Ник отдает в банк
 
-void nick_loan_payment()
-{
-    if (nick.credit.months_left > 0) {
-        RUB monthly_payment = (nick.credit.body / 36) + (RUB)(nick.credit.body * (nick.credit.interest / 100 / 12));    //ежемесячный платеж
+        
+        nick.zoobank.account -= total_monthly_payment;          //списывание денег у Ника
+        nick.credit.body -= principal_payment;                  //уменьшение самого долга перед банком
+        nick.credit.months_left--;              //уменьшение количества оставшихся месяцев
 
-        nick.zoobank.account -= monthly_payment;
-        nick.credit.months_left--;
+        if (nick.zoobank.account < 0) {         //штрафы в случае невыплаты
+            RUB bank_fine = 5000;
 
-        //усли денег не хватило, банк начисляет штраф, а долг растет
-        if (nick.zoobank.account < 0) {
-            nick.credit.body += 5000;
-            printf("WARNING: Nick missed a loan payment in month %d!\n", nick.credit.months_left);
+            nick.credit.body += bank_fine;      //долг растет, если не заплатил
+            nick.fines += bank_fine;
+            printf("  [BANK WARNING]: Nick v minuse! Shtraf +%lld k dolgu.\n", bank_fine);
+        }
+
+        if (nick.credit.months_left == 0) {     //для последнего платежа
+            nick.credit.body = 0;       //обнуление на всякий случай
+            printf("  [NICK]: 'Ura! YA raspravilsya s etim kreditom!'\n");
         }
     }
 }
@@ -166,6 +217,20 @@ void nick_expenses()        //расходы Ника
 {
     nick.zoobank.account -= nick.food;
     nick.zoobank.account -= nick.car.gas;
+}
+
+
+void nick_shadow_expenses(int month)        //"теневые" расходы Ника
+{              
+    RUB protection_fee = 12000;             //ник платит 'долю' Мистеру Бигу за ведение бизнеса в его районе
+    nick.zoobank.account -= protection_fee;
+    
+    
+    if (month % 4 == 0) {           //дополнительный риск: иногда бизнес работает в ноль или минус
+        RUB spoiled_pizza = 15000; //продукты испортились
+        nick.zoobank.account -= spoiled_pizza;
+        printf("  [NICK TROUBLE]: Produkty isportilis'! Poteryano %lld RUB\n", spoiled_pizza);
+    }
 }
 
 
@@ -206,155 +271,155 @@ void nick_life_events(int month, int year)
 
     switch (event_id) {
     case 0:
-        printf("Nick prodal partiyu 'Lapo-ledentsov' slonam. +15000 RUB\n");
+        printf("Nick prodal partiyu 'Lapo-ledentsov' slonam. +15000 RUB\n\n");
         nick.zoobank.account += 15000;
         break;
     case 1:
-        printf("Noviy kontrakt s Politehom na postavku picci. +4000 RUB\n");
+        printf("Noviy kontrakt s Politehom na postavku picci. +4000 RUB\n\n");
         nick.Nickizza.monthly_profit += 4000;
         break;
     case 2:
-        printf("Mister Big prigrozil za starye dolgi. Prishlos' otdat' 'protsent za uvazhenie'. -12000 RUB\n");
+        printf("Mister Big prigrozil za starye dolgi. Prishlos' otdat' 'protsent za uvazhenie'. -12000 RUB\n\n");
         nick.zoobank.account -= 12000;
         break;
     case 3:
-        printf("Judy pomogla zakryt' shtrafy Nicka po staroy druzhbe. +5000 RUB\n");
+        printf("Judy pomogla zakryt' shtrafy Nicka po staroy druzhbe. +5000 RUB\n\n");
         nick.zoobank.account += 5000;
         break;
     case 4:
-        printf("Nick nashel skidku na syr dlya pitstsy. Pribyl' 'Nickiccy' rastet!\n");
+        printf("Nick nashel skidku na syr dlya pitstsy. Pribyl' 'Nickiccy' rastet!\n\n");
         nick.Nickizza.monthly_profit += 2000;
         break;
     case 5:
-        printf("Furgon slomalsya pryamo posredi dorogi. Srochnyy remont dvigatelya. -25000 RUB\n");
+        printf("Furgon slomalsya pryamo posredi dorogi. Srochnyy remont dvigatelya. -25000 RUB\n\n");
         nick.zoobank.account -= 25000;
         break;
     case 6:
-        printf("Nick pereprodal bilet v operu baranu-mafiose. +8500 RUB\n");
+        printf("Nick pereprodal bilet v operu baranu-mafiose. +8500 RUB\n\n");
         nick.zoobank.account += 8500;
         break;
     case 7:
-        printf("Nalogovaya inspektsiya proverila scheta 'Nickiccy'. Prishlos' zaplatit' nalog. -15000 RUB\n");
+        printf("Nalogovaya inspektsiya proverila scheta 'Nickiccy'. Prishlos' zaplatit' nalog. -15000 RUB\n\n");
         nick.zoobank.account -= 15000;
         break;
     case 8:
-        printf("Vypala nevidannaya udacha v ulichnuyu lotereyu 'Hvost Udachi'! +10000 RUB\n");
+        printf("Vypala nevidannaya udacha v ulichnuyu lotereyu 'Hvost Udachi'! +10000 RUB\n\n");
         nick.zoobank.account += 10000;
         break;
     case 9:
-        printf("Nick kupil novyy dorogoy galstuk dlya vstrechi s investorami. -4500 RUB\n");
+        printf("Nick kupil novyy dorogoy galstuk dlya vstrechi s investorami. -4500 RUB\n\n");
         nick.zoobank.account -= 4500;
         break;
     case 10:
-        printf("doch' Mistera Biga stala postoyannym klientom. Pribyl' rastet! +5000 RUB\n");
+        printf("doch' Mistera Biga stala postoyannym klientom. Pribyl' rastet! +5000 RUB\n\n");
         nick.Nickizza.monthly_profit += 5000;
         break;
     case 11:
-        printf("Nick reshil s'ekonomit' na nalogakh, no ego poimali. Shtraf! -20000 RUB\n");
+        printf("Nick reshil s'ekonomit' na nalogakh, no ego poimali. Shtraf! -20000 RUB\n\n");
         nick.zoobank.account -= 20000;
         break;
     case 12:
-        printf("Vygodnyy obmen valyuty u podpol'nykh dilerov v ruyone Tundratown. +1000 USD\n");
+        printf("Vygodnyy obmen valyuty u podpol'nykh dilerov v ruyone Tundratown. +1000 USD\n\n");
         nick.zoobank.account_usd += 1000;
         break;
     case 13:
-        printf("Nick kupil stil'nye ochki, chtoby vyglyadet' solidnee. -7000 RUB\n");
+        printf("Nick kupil stil'nye ochki, chtoby vyglyadet' solidnee. -7000 RUB\n\n");
         nick.zoobank.account -= 7000;
         break;
     case 14:
-        printf("Sosedi pozhalovalis' na shum ot pechi dlya pitstsy. Vzyatka inspektoru. -5000 RUB\n");
+        printf("Sosedi pozhalovalis' na shum ot pechi dlya pitstsy. Vzyatka inspektoru. -5000 RUB\n\n");
         nick.zoobank.account -= 5000;
         break;
     case 15:
-        printf("Judy zabyla obed, i Nick ugostil ee koronnoiy pitstsey. -1000 RUB.\n");
+        printf("Judy zabyla obed, i Nick ugostil ee koronnoiy pitstsey. -1000 RUB.\n\n");
         nick.zoobank.account -= 1000;
         break;
     case 16:
-        printf("Nick nashel novogo postavshchika muki. Zatraty snizilis'.\n");
+        printf("Nick nashel novogo postavshchika muki. Zatraty snizilis'.\n\n");
         nick.Nickizza.monthly_profit += 3000;
         break;
     case 17:
-        printf("Vystavka malogo biznesa v Zveropolise. Nick poluchil pochetnyy grant! +40000 RUB\n");
+        printf("Vystavka malogo biznesa v Zveropolise. Nick poluchil pochetnyy grant! +40000 RUB\n\n");
         nick.zoobank.account += 40000;
         break;
     case 18:
-        printf("Kto-to skrutil zerkala s furgona Nicka noch'yu. -4000 RUB\n");
+        printf("Kto-to skrutil zerkala s furgona Nicka noch'yu. -4000 RUB\n\n");
         nick.zoobank.account -= 4000;
         break;
     case 19:
-        printf("Glavnyy povar 'Nickiccy' ushel v otpusk. Ubytki. -6000 RUB\n");
+        printf("Glavnyy povar 'Nickiccy' ushel v otpusk. Ubytki. -6000 RUB\n\n");
         nick.zoobank.account -= 6000;
         break;
     case 20:
-        printf("Nick zaregistriroval novyy brend 'Wild Pizza'. Investitsii v marketing. -15000 RUB\n");
+        printf("Nick zaregistriroval novyy brend 'Wild Pizza'. Investitsii v marketing. -15000 RUB\n\n");
         nick.Nickizza.investment += 15000;
         break;
     case 21:
-        printf("Krysha garazha protekla vo vremya dozhdya. Nuzhen remont. -5000 RUB\n");
+        printf("Krysha garazha protekla vo vremya dozhdya. Nuzhen remont. -5000 RUB\n\n");
         nick.zoobank.account -= 5000;
         break;
     case 22:
-        printf("Selfi Nicka s pitstsey stalo virusnym v setyakh. Reklama! +10000 RUB\n");
+        printf("Selfi Nicka s pitstsey stalo virusnym v setyakh. Reklama! +10000 RUB\n\n");
         nick.zoobank.account += 10000;
         break;
     case 23:
-        printf("Nick popal v probku iz-za lenivtsev. Opovzdal na vazhnuyu sdelku. -3000 RUB\n");
+        printf("Nick popal v probku iz-za lenivtsev. Opovzdal na vazhnuyu sdelku. -3000 RUB\n\n");
         nick.zoobank.account -= 3000;
         break;
     case 24:
-        printf("Mister Big podaril Nicku staryy antikvarnyy shkaf. Tam byl tayNick! +25000 RUB\n");
+        printf("Mister Big podaril Nicku staryy antikvarnyy shkaf. Tam byl tayNick! +25000 RUB\n\n");
         nick.zoobank.account += 25000;
         break;
     case 25:
-        printf("Zabastovka fermerov. Produkty dlya lichnoy zhizni podorozhali. -4000 RUB\n");
+        printf("Zabastovka fermerov. Produkty dlya lichnoy zhizni podorozhali. -4000 RUB\n\n");
         nick.food += 4000;
         break;
     case 26:
-        printf("Nick vyigral v kosti u odnogo upyortogo barana. +15000 RUB\n");
+        printf("Nick vyigral v kosti u odnogo upyortogo barana. +15000 RUB\n\n");
         nick.zoobank.account += 15000;
         break;
     case 27:
-        printf("Nochnoe ograblenie furgona! Vorishki vskryli seyf. -12000 RUB\n");
+        printf("Nochnoe ograblenie furgona! Vorishki vskryli seyf. -12000 RUB\n\n");
         nick.zoobank.account -= 12000;
         break;
     case 28:
-        printf("Nick reshil stat' fud-blogerom i kupil doroguyu kameru. -30000 RUB\n");
+        printf("Nick reshil stat' fud-blogerom i kupil doroguyu kameru. -30000 RUB\n\n");
         nick.zoobank.account -= 30000;
         break;
     case 29:
-        printf("Bol'shoy zakaz dlya morskikh svinok. 100 mini-pitsts! +10000 RUB\n");
+        printf("Bol'shoy zakaz dlya morskikh svinok. 100 mini-pitsts! +10000 RUB\n\n");
         nick.zoobank.account += 10000;
         break;
     case 30:
-        printf("Nick nashel na svalke rariternuyu zapchast' i prodal ee kollektsioneru. +7000 RUB\n");
+        printf("Nick nashel na svalke rariternuyu zapchast' i prodal ee kollektsioneru. +7000 RUB\n\n");
         nick.zoobank.account += 7000;
         break;
     case 31:
-        printf("Odin iz kuryerov Nicka poteryal sumku s den'gami. -5000 RUB\n");
+        printf("Odin iz kuryerov Nicka poteryal sumku s den'gami. -5000 RUB\n\n");
         nick.zoobank.account -= 5000;
         break;
     case 32:
-        printf("Nick organizoval ulichnyy kvest dlya turistov. +9000 RUB\n");
+        printf("Nick organizoval ulichnyy kvest dlya turistov. +9000 RUB\n\n");
         nick.zoobank.account += 9000;
         break;
     case 33:
-        printf("Kholodil'nik v 'Nickicce' vyshel iz stroya. Produkty isportilis'. -8000 RUB\n");
+        printf("Kholodil'nik v 'Nickicce' vyshel iz stroya. Produkty isportilis'. -8000 RUB\n\n");
         nick.zoobank.account -= 8000;
         break;
     case 34:
-        printf("Nick sluchayno pomog staromu slonu pereyti dorogu. Poluchil chaevye. +1000 RUB\n");
+        printf("Nick sluchayno pomog staromu slonu pereyti dorogu. Poluchil chaevye. +1000 RUB\n\n");
         nick.zoobank.account += 1000;
         break;
     case 35:
-        printf("Vstretil Blica na pochte. Poteryal ves' den' v ocheredi. Business prostoial. -3000 RUB\n");
+        printf("Vstretil Blica na pochte. Poteryal ves' den' v ocheredi. Business prostoial. -3000 RUB\n\n");
         nick.zoobank.account -= 3000;
         break;
     case 36:
-        printf("Pomyal bamper na furgone ob klumbu. -4000 RUB\n");
+        printf("Pomyal bamper na furgone ob klumbu. -4000 RUB\n\n");
         nick.zoobank.account -= 4000;
         break;
     default:
-        printf("Obychnyy mesyac' ulichnogo lisa. Nichego ne proishodilo.\n");
+        printf("Obychnyy mesyac' ulichnogo lisa. Nichego ne proishodilo.\n\n");
         break;
     }
 }
@@ -364,7 +429,7 @@ void print_nick_report(int month, int year)             //вывод резул�
 {               
     printf("\n  _______________________________________________________  \n");
     printf(" /                                                       \\ \n");
-    printf("|   DELISHKI NickA UAYLDA (BUSINESS LOG)                   |\n");
+    printf("|   DELISHKI Nicka UAYLDA (BUSINESS LOG)                  |\n");
     printf("|   Mesyats: %02d, God: %d                                |\n", month - 1, year);
     printf("|  -----------------------------------------------------  |\n");
     printf("|   Nalichka v karmane:     %15lld RUB           |\n", nick.zoobank.account);
@@ -439,9 +504,17 @@ void judy_deposite(const int month, const int year)         //функция д�
     judy.zoobank.interest = key_rate(month, year) - delta(month, year);     //ключевая ставка - дельта ("комиссия" банка)
 
     judy.zoobank.deposite += (RUB)(judy.zoobank.deposite * (judy.zoobank.interest / 12.0 / 100.0));    //сложный процент
-
-    judy.zoobank.deposite += judy.zoobank.account;
-    judy.zoobank.account = 0;
+    
+    if (judy.zoobank.account > 0){
+        judy.zoobank.deposite += judy.zoobank.account;      //если все норм
+        judy.zoobank.account = 0;
+    }
+    else if (judy.zoobank.account < 0) {
+        printf("  [BANK]: Vnimanie! Otricatel'nyy balans na schetu Judy (%lld). Pogashenie iz depozita.\n", judy.zoobank.account);
+        judy.zoobank.deposite += judy.zoobank.account; //вычитание долга из накоплений
+        judy.zoobank.account = 0;
+    }
+    
 }
 
 
@@ -465,7 +538,7 @@ void judy_currency_exchange(int month)          //официальный обм�
             judy.zoobank.account -= sum_to_exchange;
             judy.zoobank.account_usd += bought_usd;
 
-            printf("  [ZPD BANK]: Operaciya obmena. Kupleno %lld USD s komissiey 5%%.\n", bought_usd);
+            printf("  [VALYUTNI BANK]: Operaciya obmena. Kupleno %lld USD s komissiey 5%%.\n", bought_usd);
         }
     }
 }
@@ -663,6 +736,7 @@ void simulation()                   //функция всей симуляции
 
         //повышение цен от инфляции и индексация зарплаты
         inflation(month, year);
+        update_currency_rate(month, year);
 
 
         //--- Для Джуди ---//
@@ -681,19 +755,24 @@ void simulation()                   //функция всей симуляции
         // my_medine();
         // my_home();
 
+        //перевод валют
+        judy_currency_exchange(month);
         //проценты и перевод остатка на депозит
         judy_deposite(month, year);
 
 
         //--- Для Ника ---//
-        nick_life_events(month, year);  //те рандомные события в жизни Ника
-        nick_business_logic(month, year);
-        nick_expenses();
-        nick_loan_payment();
+        nick_business_logic(month, year);   //бизнес
+        nick_life_events(month, year);      //те рандомные события в жизни Ника
+        nick_shadow_expenses(month);        //теневые траты
+        nick_expenses();            //расходы
+        nick_loan_payment();        //платеж по кредиту
+        nick_black_market_exchange(month, year);    //перевод валюты
 
 
         ++month;
         if (month == 13) {
+            calculate_taxes(year);
             printf("------------Year %d", year);
             printf(" Results:------------------------\n");
             printf("\n");
