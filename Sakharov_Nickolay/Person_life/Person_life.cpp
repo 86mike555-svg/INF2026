@@ -2070,6 +2070,7 @@ void simulate_bob()
         bob_property(month);
         bob_food();
         bob_cat();
+        bob_car(month);
         bob_health();
         bob_transport();
         bob_monthly_events();
