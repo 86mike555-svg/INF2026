@@ -1,0 +1,743 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <random>
+#include <algorithm>
+#include <string>
+#include <unordered_map>
+#include <cmath>
+
+using RUB = long int;
+using USD = long int;
+using EUR = long int;
+using km = int;
+using liter = int;
+using procent = const float;
+
+struct taxes_state
+{
+	procent pdn = 13;
+};
+struct taxes_state taxes_state;
+
+class Bank
+{
+private:
+	float dollar_exchange_rate;
+	float euro_exchange_rate;
+	
+public:
+	RUB account_rub;
+	USD account_usd;
+	EUR account_eur;
+	
+	void RUB_to_USD(const RUB RUB)
+	{
+		account_rub -= RUB;
+		account_usd = RUB / dollar_exchange_rate;
+	}
+
+	void RUB_to_EUR(const RUB RUB)
+	{
+		account_rub -= RUB;
+		account_eur = RUB / euro_exchange_rate;
+	}
+
+	void print()
+	{
+		std::cout << "RUB = " << account_rub;
+	}
+
+};
+
+struct Car
+{
+	RUB car_cost;
+	RUB fuel;
+	//km mileage;
+};
+
+struct Alice
+{
+	short age;
+    std::unordered_map<std::string, double> fridge;
+	RUB food_cost;
+	RUB taxes;
+	RUB salary;
+	RUB investments;
+	Car car; // toyota camry
+	Bank Sber;
+};
+
+struct Alice Alice;
+
+std::map<std::string, RUB> holidays
+{
+	{"Birthday", 50'000},
+	{"New year", 40'000},
+	{"23 febary", 20'000},
+	{"8 march", 20'000},
+};
+
+RUB Alice_service_station(const int month, const int mileage /*const int random*/)
+{
+	RUB cost_of_repair = 0;
+
+	std::map<std::string, RUB> parts_costs
+	{
+		{"filter_oil", 1'000},
+		{"filter_air", 750},
+		{"filter_fuel", 10'000},
+		{"filter_cabin", 5'600},
+		{"antifreeze", 2'400},
+		{"break_fluid", 9'000},
+		{"motor_oil", 5'000},
+		{"spark_plugs", 10'000}
+	};
+
+	if (month == 7)
+	{
+		for (const auto& [product, price] : parts_costs)
+			cost_of_repair += price;
+	}
+
+	cost_of_repair += 500;
+
+	return cost_of_repair;
+}
+
+
+// ---------- СТРУКТУРЫ ----------
+struct Ingredient {
+    std::string name;
+    double amount;
+};
+
+struct Recipe {
+    std::string name;
+    std::vector<Ingredient> ingredients;
+};
+
+struct ShopProduct {
+    std::string name;
+    double pricePerPack;
+    double packSize;
+};
+
+struct PurchasedItem {
+    std::string name;
+    int packsBought;
+    double totalAmount;
+    double totalPrice;
+};
+
+struct ShopResult {
+    std::vector<PurchasedItem> items;
+    double totalSpent = 0;
+};
+
+/*struct FoodResult {
+    std::unordered_map<std::string, double> fridge;
+    double totalSpent = 0;
+};*/
+
+// ---------- УРОВНИ ЗАРПЛАТЫ ----------
+enum class IncomeLevel { Low, Medium, High, Rich };
+
+IncomeLevel getIncomeLevel(double salary) {
+    if (salary < 30000)  return IncomeLevel::Low;
+    if (salary < 70000)  return IncomeLevel::Medium;
+    if (salary < 150000) return IncomeLevel::High;
+    return IncomeLevel::Rich;
+}
+
+// ---------- БЮДЖЕТНЫЙ РЕЖИМ ----------
+enum class BudgetMode { Normal, NoSnacks, Cheap };
+
+BudgetMode getBudgetMode(double spentSoFar, double budget, int daysLeft, int totalDays) {
+    int daysDone = totalDays - daysLeft;
+    if (daysDone == 0) return BudgetMode::Normal;
+    double avgPerDay = spentSoFar / daysDone;
+    double projectedTotal = avgPerDay * totalDays;
+    if (projectedTotal <= budget)        return BudgetMode::Normal;
+    if (projectedTotal <= budget * 1.2)  return BudgetMode::NoSnacks;
+    return BudgetMode::Cheap;
+}
+
+// ---------- МАГАЗИН ----------
+ShopResult shop(const std::vector<std::pair<std::string, double>>& shoppingList,
+    IncomeLevel level) {
+
+    static const std::vector<ShopProduct> productsLow{
+        {"овсянка",      40.0,  500.0},
+        {"гречка",       60.0,  900.0},
+        {"рис",          50.0,  900.0},
+        {"манка",        35.0,  700.0},
+        {"молоко",       60.0, 1000.0},
+        {"яйца",         70.0,   10.0},
+        {"хлеб",         35.0,  500.0},
+        {"масло",        90.0,  200.0},
+        {"сыр",         130.0,  300.0},
+        {"колбаса",     150.0,  300.0},
+        {"курица",      200.0, 1000.0},
+        {"говядина",    350.0, 1000.0},
+        {"картошка",     40.0, 1000.0},
+        {"макароны",     50.0,  400.0},
+        {"помидоры",     60.0,  500.0},
+        {"огурцы",       50.0,  500.0},
+        {"капуста",      30.0, 1000.0},
+        {"морковь",      35.0,  500.0},
+        {"сметана",      45.0,  400.0},
+        {"борщ (набор)", 120.0,   1.0},
+        {"чай",          60.0,  100.0},
+        {"кофе",        150.0,  200.0},
+        {"сок",          60.0, 1000.0},
+        {"вода",         25.0,  500.0},
+        {"печенье",      70.0,  400.0},
+        {"шоколад",      80.0,  100.0},
+        {"чипсы",        70.0,  150.0},
+        {"орехи",       120.0,  150.0},
+        {"йогурт",       40.0,  300.0},
+        {"банан",        20.0,    1.0},
+        {"яблоко",       15.0,    1.0},
+        {"творог",       70.0,  200.0},
+        {"сосиски",     120.0,  400.0},
+        {"лапша",       180.0,    1.0},
+    };
+
+    static const std::vector<ShopProduct> productsMedium{
+        {"овсянка",      60.0,  500.0},
+        {"гречка",       90.0,  900.0},
+        {"рис",          80.0,  900.0},
+        {"манка",        55.0,  700.0},
+        {"молоко",       80.0, 1000.0},
+        {"яйца",         90.0,   10.0},
+        {"хлеб",         50.0,  500.0},
+        {"масло",       150.0,  200.0},
+        {"сыр",         200.0,  300.0},
+        {"колбаса",     250.0,  300.0},
+        {"курица",      300.0, 1000.0},
+        {"говядина",    500.0, 1000.0},
+        {"картошка",     60.0, 1000.0},
+        {"макароны",     70.0,  400.0},
+        {"помидоры",     90.0,  500.0},
+        {"огурцы",       70.0,  500.0},
+        {"капуста",      40.0, 1000.0},
+        {"морковь",      50.0,  500.0},
+        {"сметана",      60.0,  400.0},
+        {"борщ (набор)", 200.0,   1.0},
+        {"чай",         100.0,  100.0},
+        {"кофе",        300.0,  200.0},
+        {"сок",          90.0, 1000.0},
+        {"вода",         40.0,  500.0},
+        {"печенье",     120.0,  400.0},
+        {"шоколад",     150.0,  100.0},
+        {"чипсы",       100.0,  150.0},
+        {"орехи",       200.0,  150.0},
+        {"йогурт",       60.0,  300.0},
+        {"банан",        30.0,    1.0},
+        {"яблоко",       25.0,    1.0},
+        {"творог",      100.0,  200.0},
+        {"сосиски",     180.0,  400.0},
+        {"лапша",       250.0,    1.0},
+    };
+
+    static const std::vector<ShopProduct> productsHigh{
+        {"овсянка",     100.0,  500.0},
+        {"гречка",      150.0,  900.0},
+        {"рис",         130.0,  900.0},
+        {"манка",        90.0,  700.0},
+        {"молоко",      130.0, 1000.0},
+        {"яйца",        150.0,   10.0},
+        {"хлеб",        120.0,  500.0},
+        {"масло",       280.0,  200.0},
+        {"сыр",         450.0,  300.0},
+        {"колбаса",     500.0,  300.0},
+        {"курица",      550.0, 1000.0},
+        {"говядина",    900.0, 1000.0},
+        {"картошка",    100.0, 1000.0},
+        {"макароны",    150.0,  400.0},
+        {"помидоры",    200.0,  500.0},
+        {"огурцы",      180.0,  500.0},
+        {"капуста",      80.0, 1000.0},
+        {"морковь",     100.0,  500.0},
+        {"сметана",     130.0,  400.0},
+        {"борщ (набор)",400.0,    1.0},
+        {"чай",         300.0,  100.0},
+        {"кофе",        800.0,  200.0},
+        {"сок",         200.0, 1000.0},
+        {"вода",        100.0,  500.0},
+        {"печенье",     300.0,  400.0},
+        {"шоколад",     400.0,  100.0},
+        {"чипсы",       200.0,  150.0},
+        {"орехи",       400.0,  150.0},
+        {"йогурт",      150.0,  300.0},
+        {"банан",        60.0,    1.0},
+        {"яблоко",       70.0,    1.0},
+        {"творог",      200.0,  200.0},
+        {"сосиски",     400.0,  400.0},
+        {"лапша",       400.0,    1.0},
+    };
+
+    static const std::vector<ShopProduct> productsRich = []() {
+        std::vector<ShopProduct> rich = {
+            {"овсянка",     150.0,  500.0},
+            {"гречка",      225.0,  900.0},
+            {"рис",         195.0,  900.0},
+            {"манка",       135.0,  700.0},
+            {"молоко",      195.0, 1000.0},
+            {"яйца",        225.0,   10.0},
+            {"хлеб",        180.0,  500.0},
+            {"масло",       420.0,  200.0},
+            {"сыр",         675.0,  300.0},
+            {"колбаса",     750.0,  300.0},
+            {"курица",      825.0, 1000.0},
+            {"говядина",   1350.0, 1000.0},
+            {"картошка",    150.0, 1000.0},
+            {"макароны",    225.0,  400.0},
+            {"помидоры",    300.0,  500.0},
+            {"огурцы",      270.0,  500.0},
+            {"капуста",     120.0, 1000.0},
+            {"морковь",     150.0,  500.0},
+            {"сметана",     195.0,  400.0},
+            {"борщ (набор)",600.0,    1.0},
+            {"чай",         450.0,  100.0},
+            {"кофе",       1200.0,  200.0},
+            {"сок",         300.0, 1000.0},
+            {"вода",        150.0,  500.0},
+            {"печенье",     450.0,  400.0},
+            {"шоколад",     600.0,  100.0},
+            {"чипсы",       300.0,  150.0},
+            {"орехи",       600.0,  150.0},
+            {"йогурт",      225.0,  300.0},
+            {"банан",        90.0,    1.0},
+            {"яблоко",      105.0,    1.0},
+            {"творог",      300.0,  200.0},
+            {"сосиски",     600.0,  400.0},
+            {"лапша",       600.0,    1.0},
+        };
+        return rich;
+        }();
+
+    const std::vector<ShopProduct>* products = nullptr;
+    switch (level) {
+    case IncomeLevel::Low:    products = &productsLow;    break;
+    case IncomeLevel::Medium: products = &productsMedium; break;
+    case IncomeLevel::High:   products = &productsHigh;   break;
+    case IncomeLevel::Rich:   products = &productsRich;   break;
+    }
+
+    std::unordered_map<std::string, const ShopProduct*> productMap;
+    for (const auto& p : *products)
+        productMap[p.name] = &p;
+
+    ShopResult result;
+    for (const auto& [name, needed] : shoppingList) {
+        auto it = productMap.find(name);
+        if (it == productMap.end()) continue;
+
+        const ShopProduct& product = *it->second;
+        int    packsNeeded = (int)std::ceil(needed / product.packSize);
+        double boughtAmount = packsNeeded * product.packSize;
+        double cost = packsNeeded * product.pricePerPack;
+
+        result.items.push_back({ name, packsNeeded, boughtAmount, cost });
+        result.totalSpent += cost;
+    }
+    return result;
+}
+
+// ---------- ВСПОМОГАТЕЛЬНОЕ ----------
+bool hasHoliday(int month, int day) {
+    if (month == 2 && day == 23) return true;
+    if (month == 3 && day == 8)  return true;
+    if (month == 12 && day == 31) return true;
+    return false;
+}
+
+int daysInMonth(int month) {
+    constexpr int days[] = { 0,31,28,31,30,31,30,31,31,30,31,30,31 };
+    if (month < 1 || month > 12) return 30;
+    return days[month];
+}
+
+double buyIfNeeded(std::unordered_map<std::string, double>& fridge,
+    const Ingredient& ing, IncomeLevel level) {
+    double have = fridge[ing.name];
+    if (have >= ing.amount) return 0.0;
+    ShopResult result = shop({ {ing.name, ing.amount - have} }, level);
+    for (const auto& item : result.items)
+        fridge[item.name] += item.totalAmount;
+    return result.totalSpent;
+}
+
+double cookMeal(std::unordered_map<std::string, double>& fridge,
+    const Recipe& meal, IncomeLevel level) {
+    double spent = 0.0;
+    for (const auto& ing : meal.ingredients) {
+        spent += buyIfNeeded(fridge, ing, level);
+        fridge[ing.name] -= ing.amount;
+    }
+    return spent;
+}
+
+// ---------- ОСНОВНАЯ ФУНКЦИЯ ----------
+RUB Food(int month,
+    std::unordered_map<std::string, double> &fridge,
+    double salary) {
+
+    std::mt19937 gen(std::random_device{}());
+    IncomeLevel level = getIncomeLevel(salary);
+    double      budget = salary * 0.30;
+    double      totalSpent = 0.0;
+    int         totalDays = daysInMonth(month);
+
+    auto pickRandom = [&gen](const std::vector<Recipe>& v) -> const Recipe& {
+        std::uniform_int_distribution<> dist(0, (int)v.size() - 1);
+        return v[dist(gen)];
+        };
+    auto chance = [&gen](int percent) -> bool {
+        std::uniform_int_distribution<> dist(1, 100);
+        return dist(gen) <= percent;
+        };
+
+    // ===== ОБЫЧНЫЕ РЕЦЕПТЫ =====
+    const std::vector<Recipe> porridges{
+        {"Овсянка",      {{"овсянка", 80.0}, {"молоко", 200.0}}},
+        {"Гречка",       {{"гречка",  80.0}, {"масло",   10.0}}},
+        {"Рисовая каша", {{"рис",     80.0}, {"молоко", 200.0}}},
+        {"Манка",        {{"манка",   60.0}, {"молоко", 200.0}}},
+    };
+    const std::vector<Recipe> lightBreakfast{
+        {"Бутерброд с сыром",    {{"хлеб",   80.0}, {"сыр",     30.0}, {"масло", 5.0}}},
+        {"Бутерброд с колбасой", {{"хлеб",   80.0}, {"колбаса", 40.0}}},
+        {"Яичница",              {{"яйца",    2.0}, {"масло",   10.0}}},
+        {"Творог",               {{"творог",150.0}, {"сметана", 30.0}}},
+        {"Йогурт с бананом",     {{"йогурт",200.0}, {"банан",    1.0}}},
+    };
+    const std::vector<Recipe> breakfastDrinks{
+        {"Чай",  {{"чай",   5.0}}},
+        {"Кофе", {{"кофе", 10.0}}},
+        {"Сок",  {{"сок", 200.0}}},
+    };
+    const std::vector<Recipe> firstCourse{
+        {"Борщ",         {{"борщ (набор)", 1.0}, {"сметана",  50.0}}},
+        {"Куриный суп",  {{"курица",     300.0}, {"картошка",150.0}, {"морковь", 50.0}}},
+        {"Гречневый суп",{{"гречка",      80.0}, {"морковь",  50.0}, {"картошка",100.0}}},
+    };
+    const std::vector<Recipe> secondCourse{
+        {"Курица с картошкой",   {{"курица",   300.0}, {"картошка", 250.0}}},
+        {"Макароны с сыром",     {{"макароны", 200.0}, {"сыр",       50.0}, {"масло", 15.0}}},
+        {"Гречка с говядиной",   {{"гречка",   150.0}, {"говядина", 250.0}}},
+        {"Рис с курицей",        {{"рис",      150.0}, {"курица",   250.0}}},
+        {"Картошка с сосисками", {{"картошка", 250.0}, {"сосиски",  150.0}}},
+    };
+    const std::vector<Recipe> salads{
+        {"Салат овощной",   {{"помидоры", 150.0}, {"огурцы",  150.0}, {"сметана", 30.0}}},
+        {"Салат капустный", {{"капуста",  200.0}, {"морковь",  80.0}, {"сметана", 30.0}}},
+        {"Помидоры",        {{"помидоры", 200.0}}},
+    };
+    const std::vector<Recipe> lunchDrinks{
+        {"Чай",  {{"чай",   5.0}}},
+        {"Сок",  {{"сок", 300.0}}},
+        {"Вода", {{"вода",500.0}}},
+    };
+    const std::vector<Recipe> lightDinner{
+        {"Бутерброд",          {{"хлеб",   80.0}, {"колбаса",  40.0}}},
+        {"Яичница",            {{"яйца",    2.0}, {"масло",    10.0}}},
+        {"Творог со сметаной", {{"творог",150.0}, {"сметана",  30.0}}},
+        {"Йогурт",             {{"йогурт",200.0}}},
+        {"Каша",               {{"гречка", 80.0}, {"масло",    10.0}}},
+    };
+    const std::vector<Recipe> dinnerDrinks{
+        {"Чай",  {{"чай",   5.0}}},
+        {"Кофе", {{"кофе", 10.0}}},
+        {"Вода", {{"вода",300.0}}},
+    };
+    const std::vector<Recipe> holidayLunches{
+        {"Праздничная курица", {{"курица",  800.0}, {"картошка", 500.0}, {"сметана", 100.0}}},
+        {"Плов праздничный",   {{"рис",     300.0}, {"говядина", 600.0}, {"морковь", 150.0}, {"масло", 50.0}}},
+    };
+    const std::vector<Recipe> snacks{
+        {"Печенье", {{"печенье", 50.0}}},
+        {"Шоколад", {{"шоколад", 25.0}}},
+        {"Чипсы",   {{"чипсы",   40.0}}},
+        {"Орехи",   {{"орехи",   30.0}}},
+        {"Банан",   {{"банан",    1.0}}},
+        {"Яблоко",  {{"яблоко",  1.0}}},
+        {"Лапша",   {{"лапша",   1.0}}},
+    };
+    const std::vector<Recipe> dayDrinks{
+        {"Чай",  {{"чай",   5.0}}},
+        {"Кофе", {{"кофе", 10.0}}},
+        {"Сок",  {{"сок", 200.0}}},
+        {"Вода", {{"вода",500.0}}},
+    };
+
+    // ===== ДЕШЁВЫЕ ЗАМЕНЫ =====
+    const std::vector<Recipe> cheapPorridges{
+        {"Овсянка на воде", {{"овсянка", 80.0}, {"вода", 200.0}}},
+        {"Гречка на воде",  {{"гречка",  80.0}}},
+    };
+    const std::vector<Recipe> cheapLight{
+        {"Хлеб с маслом", {{"хлеб", 80.0}, {"масло", 5.0}}},
+        {"Яйцо варёное",  {{"яйца",  2.0}}},
+    };
+    const std::vector<Recipe> cheapDrinks{
+        {"Чай",  {{"чай",   5.0}}},
+        {"Вода", {{"вода", 300.0}}},
+    };
+    const std::vector<Recipe> cheapFirst{
+        {"Картофельный суп", {{"картошка", 200.0}, {"морковь", 50.0}}},
+        {"Гречневый суп",    {{"гречка",    80.0}, {"морковь", 50.0}}},
+    };
+    const std::vector<Recipe> cheapSecond{
+        {"Гречка с маслом", {{"гречка",   150.0}, {"масло", 10.0}}},
+        {"Макароны",        {{"макароны", 200.0}, {"масло", 10.0}}},
+        {"Рис с маслом",    {{"рис",      150.0}, {"масло", 10.0}}},
+    };
+    const std::vector<Recipe> cheapDinner{
+        {"Хлеб с маслом", {{"хлеб",   80.0}, {"масло",  5.0}}},
+        {"Каша на воде",  {{"гречка", 80.0}}},
+        {"Яйцо варёное",  {{"яйца",   2.0}}},
+    };
+
+    // ---------- ДНИ МЕСЯЦА ----------
+    for (int day = 1; day <= totalDays; ++day) {
+        bool       holiday = hasHoliday(month, day);
+        int        daysLeft = totalDays - day;
+        BudgetMode mode = getBudgetMode(totalSpent, budget, daysLeft, totalDays);
+
+        const auto& porrVec = (mode == BudgetMode::Cheap) ? cheapPorridges : porridges;
+        const auto& lightBVec = (mode == BudgetMode::Cheap) ? cheapLight : lightBreakfast;
+        const auto& bDrinkVec = (mode == BudgetMode::Cheap) ? cheapDrinks : breakfastDrinks;
+        const auto& firstVec = (mode == BudgetMode::Cheap) ? cheapFirst : firstCourse;
+        const auto& secondVec = (mode == BudgetMode::Cheap) ? cheapSecond : secondCourse;
+        const auto& lDrinkVec = (mode == BudgetMode::Cheap) ? cheapDrinks : lunchDrinks;
+        const auto& dinnerVec = (mode == BudgetMode::Cheap) ? cheapDinner : lightDinner;
+        const auto& dDrinkVec = (mode == BudgetMode::Cheap) ? cheapDrinks : dinnerDrinks;
+
+        // Завтрак
+        totalSpent += cookMeal(fridge, pickRandom(porrVec), level);
+        totalSpent += cookMeal(fridge, pickRandom(lightBVec), level);
+        totalSpent += cookMeal(fridge, pickRandom(bDrinkVec), level);
+
+        // Обед
+        totalSpent += cookMeal(fridge, pickRandom(firstVec), level);
+        totalSpent += cookMeal(fridge,
+            (holiday && mode == BudgetMode::Normal)
+            ? pickRandom(holidayLunches)
+            : pickRandom(secondVec),
+            level);
+        if (mode != BudgetMode::Cheap)
+            totalSpent += cookMeal(fridge, pickRandom(salads), level);
+        totalSpent += cookMeal(fridge, pickRandom(lDrinkVec), level);
+
+        // Ужин
+        totalSpent += cookMeal(fridge, pickRandom(dinnerVec), level);
+        totalSpent += cookMeal(fridge, pickRandom(dDrinkVec), level);
+
+        // Перекусы — только в Normal режиме
+        if (mode == BudgetMode::Normal) {
+            if (chance(70)) totalSpent += cookMeal(fridge, pickRandom(snacks), level);
+            if (chance(80)) totalSpent += cookMeal(fridge, pickRandom(dayDrinks), level);
+        }
+    }
+
+    return totalSpent;
+}
+
+
+//void Alice_vacation()
+
+struct Event
+{
+	std::string name_event;
+	float chance;
+	int income;
+	bool used = false;
+};
+
+struct MonthResult 
+{
+	std::vector<std::string> events;
+	int totalIncome = 0;
+};
+
+MonthResult generateMonthlyEvents() 
+{
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+
+	std::vector<Event> positive
+	{
+		{"You found the missing wallet", 20, 750},
+		{"Completed a complex task", 30, 5'000},
+		{"Fulfilled the sales plan", 40, 7'000},
+		{"Won the lottery", 0.001, 1'000'000},
+		{"Returned bottels", 70, 200},
+		{"Returned wasted paper", 70, 500},
+		{"Recevied store bonus points", 50, 1'500},
+		{"Found loose change in the couch", 20, 100},
+		{"Found 100 bills on the street", 12, 100},
+		{"Found 500 bills on the street", 7, 500},
+		{"Found 1000 bills on the street", 5, 1'000}
+	};
+
+	std::vector<Event> negative
+	{
+		{"Пропала мелочь из кошелька", 20, -100},
+		{"Задержка транспорта", 30, -50},
+		{"Потерял вещь", 10, -700},
+		{"Случайная ссора", 15, -200}
+	};
+
+	static std::vector<Event> oneTimePositive{
+		{"Выиграл крупный приз", 5, 5000, false},
+		{"Получил неожиданную премию", 3, 3000, false}
+	};
+
+	static std::vector<Event> oneTimeNegative{
+		{"Серьезная поломка техники", 4, -4000, false},
+		{"Потерял важный документ", 3, -1500, false}
+	};
+
+	std::uniform_int_distribution<> totalDist(6, 15);
+	int totalEvents = totalDist(gen);
+
+	std::uniform_real_distribution<> moodDist(0.3, 0.7);
+	std::bernoulli_distribution typeDist(moodDist(gen));
+
+	std::vector<int> posWeights, negWeights;
+	for (const auto& e : positive) posWeights.push_back(e.chance);
+	for (const auto& e : negative) negWeights.push_back(e.chance);
+
+	std::discrete_distribution<> posDist(posWeights.begin(), posWeights.end());
+	std::discrete_distribution<> negDist(negWeights.begin(), negWeights.end());
+
+	MonthResult result;
+	result.events.reserve(totalEvents);
+
+	// Очень редкий шанс одноразового события
+	std::bernoulli_distribution ultraRare(0.02);
+
+	auto pickOneTime = [&](std::vector<Event>& vec) -> bool
+	{
+		std::vector<int> weights;
+		std::vector<int> indices;
+
+		for (int i = 0; i < (int)vec.size(); ++i) 
+		{
+			if (!vec[i].used) 
+			{
+				weights.push_back(vec[i].chance);
+				indices.push_back(i);
+			}
+		}
+
+		if (weights.empty()) return false;
+
+		std::discrete_distribution<> dist(weights.begin(), weights.end());
+		int local = dist(gen);
+		int realIndex = indices[local];
+
+		vec[realIndex].used = true;
+		result.events.push_back(vec[realIndex].name_event);
+		result.totalIncome += vec[realIndex].income;
+		return true;
+	};
+
+	for (int i = 0; i < totalEvents; ++i) 
+	{
+		bool isPositive = typeDist(gen);
+
+		// Проверка ультра-редкого события
+		if (ultraRare(gen)) 
+		{
+			bool success = false;
+			if (isPositive)
+				success = pickOneTime(oneTimePositive);
+			else
+				success = pickOneTime(oneTimeNegative);
+
+			if (success) continue;
+		}
+
+		if (isPositive) 
+		{
+			int idx = posDist(gen);
+			result.events.push_back(positive[idx].name_event);
+			result.totalIncome += positive[idx].income;
+		}
+		else 
+		{
+			int idx = negDist(gen);
+			result.events.push_back(negative[idx].name_event);
+			result.totalIncome += negative[idx].income;
+		}
+	}
+
+	std::shuffle(result.events.begin(), result.events.end(), gen);
+	return result;
+}
+
+
+void Alice_start() 
+{
+	Alice.age = 24;
+	Alice.salary = 60'000;
+	Alice.Sber.account_rub = 0;
+
+	Alice.car.car_cost = 4'000'000; // toyota camry (RUB)
+	Alice.car.fuel = 6'000;
+	//Alice.car.mileage = 0;
+
+	//Alice.credit.debt = 3'000'000;
+	//Alice.credit.payment = 40'000;
+	//alice.credit.month = (alice.credit.debt / alice.credit.payment);
+}
+
+void Alice_live()
+{
+	int month = 1;
+	while (month < 13)
+	{
+
+		MonthResult Events = generateMonthlyEvents();
+		Alice.Sber.account_rub += Events.totalIncome;
+		/*for (auto& a : Events.events)
+			std::cout << a << std::endl;
+		std::cout << "Случайные траты за месяц >>> " << Events.totalIncome << std::endl;
+		*/
+        Alice.food_cost = Food(month, Alice.fridge, Alice.salary);
+		Alice.Sber.account_rub -= Alice.food_cost;
+		std::cout << Alice.food_cost << std::endl;
+		//break;
+
+		month++;
+		if (month == 13)
+		{
+			Alice.age++;
+			//year++;
+			month = 1;
+		}
+
+		if (Alice.age == 97) break;
+	}
+}
+
+void Alice_conclusion()
+{
+	Alice.Sber.print();
+}
+
+int main()
+{
+	setlocale(LC_ALL, "ru");
+
+	Alice_start();
+
+	Alice_live();
+
+	Alice_conclusion();
+}
