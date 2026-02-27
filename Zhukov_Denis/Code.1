@@ -1,10 +1,17 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <clocale>
-#include <fstream>
+#include <fstream> // для вывода в таблицу excel
+#include <iomanip>
+#include <random>
 
 using RUB = long long int;
 using percent = float;
+
+// рандомайзер от 1 до 15 для инфляции
+std::random_device rd;
+std::mt19937 gen(rd());     // генератор Вихрь Мерсенна
+std::uniform_real_distribution<> inf_dis(1.0, 15.0);
 
 
 struct bank
@@ -49,6 +56,7 @@ struct Person
 	RUB dog;
 	RUB rent;
 
+	bool has_car;
 	transport car;
 	transport metro;
 
@@ -85,6 +93,8 @@ struct MonthlyStats
 
 	// Капитал
 	RUB capital;
+
+	double inflation_rate;
 };
 
 
@@ -93,13 +103,14 @@ void Biba_init()
 	Biba.vtb.account = 0;
 	Biba.salary = 150'000;
 	Biba.vtb.deposit = 1'000'000;
-	Biba.vtb.interest = 8;
+	Biba.vtb.interest = 8.0f;
 
 	Biba.food = 20'000;
 	Biba.rent = 30'000;
 	Biba.cat = 0; // кота нет
 	Biba.dog = 10'000;
 
+	Biba.has_car = true;
 	Biba.car.value = 2'400'000;
 	Biba.car.gaz = 8'000;
 	Biba.car.service = 3'000;
@@ -123,7 +134,57 @@ void Boba_init()
 	Boba.dog = 0; // пса нет
 	Boba.rent = 25'000;
 
+	Boba.has_car = false;
+	Boba.car.value = 1'200'000;
+	Boba.car.gaz = 5'000;
+	Boba.car.service = 3'000;
+	Boba.car.tires = 20'000;
+	Boba.car.oil = 5'000;
+
 	Boba.metro.gaz = 3'000;
+}
+
+
+double apply_inflation(int year, int month)
+{
+	// инфляция применяется только в январе, первый год инфляции нет
+	if (month == 1 and year > 2030)
+	{
+		double inflation_rate = inf_dis(gen);
+		double multiplier = 1.0 + inflation_rate / 100.0;
+
+		printf("Инфляция в %d году: +%.2f%%\n\n", year, inflation_rate);
+
+		// базовые расходы Бибы
+		Biba.food = (RUB)(Biba.food * multiplier);
+		Biba.rent = (RUB)(Biba.rent * multiplier);
+		Biba.cat = (RUB)(Biba.cat * multiplier);
+		Biba.dog = (RUB)(Biba.dog * multiplier);
+
+		// транспорт
+		Biba.car.gaz = (RUB)(Biba.car.gaz * multiplier);
+		Biba.car.service = (RUB)(Biba.car.service * multiplier);
+		Biba.car.tires = (RUB)(Biba.car.tires * multiplier);
+		Biba.car.oil = (RUB)(Biba.car.oil * multiplier);
+
+		// базовые расходы Бобы
+		Boba.food = (RUB)(Boba.food * multiplier);
+		Boba.rent = (RUB)(Boba.rent * multiplier);
+		Boba.cat = (RUB)(Boba.cat * multiplier);
+		Boba.dog = (RUB)(Boba.dog * multiplier);
+
+		// транспорт
+		Boba.car.gaz = (RUB)(Boba.car.gaz * multiplier);
+		Boba.car.service = (RUB)(Boba.car.service * multiplier);
+		Boba.car.tires = (RUB)(Boba.car.tires * multiplier);
+		Boba.car.oil = (RUB)(Boba.car.oil * multiplier);
+
+		// метро
+		Boba.metro.gaz = (RUB)(Boba.metro.gaz * multiplier);
+
+		return inflation_rate;
+	}
+	return 0.0;
 }
 
 
@@ -132,11 +193,6 @@ void Biba_salary(const int month, const int year)
 	if (month == 12)
 	{
 		Biba.vtb.account += Biba.salary; // 13-я зарплата
-	}
-
-	if (month == 5 and year == 2044)
-	{
-		Biba.salary += 30'000; // повышение
 	}
 	Biba.vtb.account += Biba.salary;
 }
@@ -147,11 +203,6 @@ void Boba_salary(const int month, const int year)
 	if (month == 12)
 	{
 		Boba.vtb.account += Boba.salary; // 13-я зарплата
-	}
-
-	if (month == 5 and year == 2040)
-	{
-		Boba.salary += 20'000; // повышение
 	}
 	Boba.vtb.account += Boba.salary;
 }
@@ -188,15 +239,50 @@ void Boba_wastes()
 	Boba.vtb.account -= Boba.cat;
 	// пса нет
 	Boba.vtb.account -= Boba.rent;
-	Boba.vtb.account -= Boba.metro.gaz;
+}
+
+
+void Boba_car(const int month, const int year)
+{
+	// покупка машины
+	if (!Boba.has_car and Boba.vtb.deposit >= 3'000'000)
+	{
+		Boba.vtb.deposit -= Boba.car.value;
+		Boba.has_car = true;
+		printf("==========================\n");
+		printf("   Боба купил машину!\n");
+		printf("остаток на депозите: %lld\n", Boba.vtb.deposit);
+		printf("==========================\n\n");
+	}
+
+	// Если есть машина
+	if (Boba.has_car)
+	{
+		Boba.vtb.account -= Boba.car.gaz;
+
+		if (month == 3 or month == 9)
+		{
+			Boba.vtb.account -= Boba.car.oil;
+			Boba.vtb.account -= Boba.car.service; // сервис и замена масла 2 раза в год
+		}
+
+		if (year % 4 == 0 and month == 10)
+		{
+			Boba.vtb.account -= Boba.car.tires; // покупка новых шин
+		}
+	}
+	else
+	{
+		// если нет машины, Боба ездит на метро
+		Boba.vtb.account -= Boba.metro.gaz;
+	}
 }
 
 
 void Biba_buy_house(int month, int year) // покупка дома
 {
 	if (!Biba.House.has_house and 
-		Biba.vtb.deposit >= 4'000'000 and 
-		month == 10 and year == 2040)
+		Biba.vtb.deposit >= 6'000'000)
 	{
 		// покупка дома
 		Biba.House.h_price = 15'000'000;
@@ -207,6 +293,11 @@ void Biba_buy_house(int month, int year) // покупка дома
 
 		Biba.House.has_house = true;
 		Biba.House.has_credit = true;
+		printf("==========================\n");
+		printf("   Биба купил дом!\n");
+		printf("остаток на депозите: %lld\n", Biba.vtb.deposit);
+		printf("==========================\n\n");
+
 		Biba.House.debt = Biba.House.h_price - Biba.House.down_payment;
 
 		Biba.rent = 6'000; // расход на ренту превращается в коммунальные платежи за дом
@@ -343,7 +434,24 @@ MonthlyStats calculate_boba_stats(int month, int year)
 	s.gaz_expense = Boba.metro.gaz;
 	s.service_expense = 0;
 
-	s.transport_total = s.gaz_expense;
+	// транспорт
+	if (Boba.has_car) {
+		s.gaz_expense = Boba.car.gaz;
+		s.service_expense = 0;
+		if (month == 3 || month == 9) {
+			s.service_expense = Boba.car.service + Boba.car.oil;
+		}
+		if (year % 4 == 0 && month == 10) {
+			s.service_expense += Boba.car.tires;
+		}
+		s.transport_total = s.gaz_expense + s.service_expense;
+	}
+	else {
+		s.gaz_expense = Boba.metro.gaz;
+		s.service_expense = 0;
+		s.transport_total = s.gaz_expense;
+	}
+
 	s.total_expenses = s.food_expense + s.pets_expense + s.rent_expense + s.transport_total;
 
 	// дом (нет)
@@ -353,13 +461,17 @@ MonthlyStats calculate_boba_stats(int month, int year)
 
 	// капитал
 	s.capital = Boba.vtb.account + Boba.vtb.deposit;
+	if (Boba.has_car) 
+	{
+		s.capital += Boba.car.value;
+	}
 
 	return s;
 }
 
 
 void save_to_csv(int year, int month, const char* person,
-	RUB account, RUB deposit, const MonthlyStats& s)
+	RUB deposit, const MonthlyStats& s)
 {
 	std::ofstream file("simulation.csv", std::ios::app);
 
@@ -368,35 +480,41 @@ void save_to_csv(int year, int month, const char* person,
 		file.seekp(0, std::ios::end);
 		if (file.tellp() == 0) {
 			file << "Год;Месяц;Персонаж;"
-				<< "Счет;Депозит;"
+				<< "Депозит;"
 				<< "Доход_всего;Зарплата;Доход_депозит;"
 				<< "Расходы_всего;Еда;Животные;Аренда;"
 				<< "Транспорт_всего;Бензин;Обслуживание;"
 				<< "Дом_всего;Платеж;Проценты;"
-				<< "Капитал\n";
+				<< "Капитал;Инфляция\n";
 		}
 		first = false;
 	}
 
-	file << year << ";" 
-		<< month << ";" 
+	file << year << ";"
+		<< month << ";"
 		<< person << ";"
-		<< account << ";" 
 		<< deposit << ";"
-		<< s.total_income << ";" 
-		<< s.salary_income << ";" 
+		<< s.total_income << ";"
+		<< s.salary_income << ";"
 		<< s.deposit_income << ";"
-		<< s.total_expenses << ";" 
-		<< s.food_expense << ";" 
-		<< s.pets_expense << ";" 
+		<< s.total_expenses << ";"
+		<< s.food_expense << ";"
+		<< s.pets_expense << ";"
 		<< s.rent_expense << ";"
-		<< s.transport_total << ";" 
-		<< s.gaz_expense << ";" 
+		<< s.transport_total << ";"
+		<< s.gaz_expense << ";"
 		<< s.service_expense << ";"
-		<< s.house_total << ";" 
-		<< s.house_payment << ";" 
+		<< s.house_total << ";"
+		<< s.house_payment << ";"
 		<< s.house_interest << ";"
-		<< s.capital << "\n";
+		<< s.capital << ";";
+
+	if (s.inflation_rate == 0.0) {
+		file << "\n";  // пустая ячейка
+	}
+	else {
+		file << std::fixed << std::setprecision(2) << s.inflation_rate << "\n";
+	}
 
 	file.close();
 }
@@ -408,7 +526,7 @@ void five_year_result(const int year, const int month)
 	{
 		printf("Год: %d\n\n", year);
 		printf("Депозит Бибы: %lld\n", Biba.vtb.deposit);
-		if (Biba.House.credit)
+		if (Biba.House.has_credit)
 		{
 			printf("Остаток долга: %lld\n\n", Biba.House.debt);
 		}
@@ -441,7 +559,13 @@ void result()
 	capital = 0;
 	capital += Boba.vtb.account;
 	capital += Boba.vtb.deposit;
+	if (Boba.has_car) 
+	{
+		capital += Boba.car.value;
+	}
 	printf("Капитал Бобы на 2050: %lld\n", capital);
+
+	printf("\nДанные сохранены в simulation.csv\n");
 }
 
 
@@ -461,6 +585,11 @@ int main()
 
 	while (not (month == 3 and year == 2050))
 	{
+		double current_inflation = 0.0;
+		if (month == 1 && year > 2030) {
+			current_inflation = apply_inflation(year, month);
+		}
+
 		Biba_salary(month, year);
 		Biba_wastes();
 		Biba_car(month, year);
@@ -472,21 +601,21 @@ int main()
 
 		Boba_salary(month, year);
 		Boba_wastes();
+		Boba_car(month, year);
 		Boba_deposite(month, year);
 
-		RUB biba_capital = Biba.vtb.account + Biba.vtb.deposit + Biba.car.value +
-			(Biba.House.has_house ? Biba.House.h_price - Biba.House.debt : 0);
+		RUB biba_capital = Biba.vtb.account + Biba.vtb.deposit + Biba.car.value + (Biba.House.has_house ? Biba.House.h_price - Biba.House.debt : 0);
 
 		// расчёт и сохранение данных в таблицу
 		MonthlyStats biba_stats = calculate_biba_stats(month, year);
-		save_to_csv(year, month, "Биба",
-			Biba.vtb.account, Biba.vtb.deposit,
-			biba_stats);
+		biba_stats.inflation_rate = current_inflation;
+		save_to_csv(year, month, "Биба", 
+					Biba.vtb.deposit, biba_stats);
 
 		MonthlyStats boba_stats = calculate_boba_stats(month, year);
-		save_to_csv(year, month, "Боба",
-			Boba.vtb.account, Boba.vtb.deposit,
-			boba_stats);
+		boba_stats.inflation_rate = current_inflation;
+		save_to_csv(year, month, "Боба", 
+					Boba.vtb.deposit, boba_stats);
 
 		month++;
 		if (month == 13)
