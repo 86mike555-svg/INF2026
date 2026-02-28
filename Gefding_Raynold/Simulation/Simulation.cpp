@@ -121,6 +121,7 @@ void alice_expences()
 {
     alice.vtb.account -= alice.food;
     alice.vtb.account -= alice.net;
+    alice.vtb.account -= alice.socialtransport;
 }
 
 void alice_insurance()
@@ -183,25 +184,28 @@ void bob_init()
     bob.vtb.account = 0;
     bob.vtb.deposite = 100'000;
     bob.vtb.interest = 14.5;
-    bob.salary = 180'000;
+    bob.salary = 120'000;
 
-    bob.vtb.account_usd = 1'000;
+    bob.vtb.account_usd = 5'000;
     bob.vtb.rate_usd_rub = 78.5;
 
-    bob.rentflat.rent = 30'000;
-    bob.rentflat.housingservices = 10'000;
+    bob.ownflat.flat = 8'000'000;
+    bob.ownflat.mortgage = 9.5;
+    bob.ownflat.mortgageterm = 240;
+    bob.ownflat.housingservices = 8'000;
 
-    bob.food = 20'000;
-    bob.net = 1'000;
-    bob.healthinsurance = 20'000;
+    bob.food = 25'000;
+    bob.net = 1'500;
+    bob.healthinsurance = 15'000;
 
-    bob.car.value = 2'400'000;
-    bob.car.gas = 15'000;
+    bob.car.value = 0;
+    bob.car.gas = 0;
+    bob.socialtransport = 3'000;
 
-    bob.pet.food = 5'000;
-    bob.pet.health = 5'000;
-    bob.pet.toilet = 5'000;
-    bob.pet.toys = 5'000;
+    bob.pet.food = 0;
+    bob.pet.health = 0;
+    bob.pet.toilet = 0;
+    bob.pet.toys = 0;
 }
 
 
@@ -223,6 +227,7 @@ void bob_expences()
 {
     bob.vtb.account -= bob.food;
     bob.vtb.account -= bob.net;
+    bob.vtb.account -= bob.socialtransport;
 }
 
 void bob_insurance()
